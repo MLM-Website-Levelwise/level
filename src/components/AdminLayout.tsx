@@ -111,7 +111,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         // { title: "Package Setting", path: "/master/package-setting" },
         // { title: "Reward", path: "/master/reward" },
         // { title: "Royalty", path: "/master/royalty" },
-        // { title: "News", path: "/master/news" },
+        { title: "News", path: "/master/news" },
       ],
     },
     {
