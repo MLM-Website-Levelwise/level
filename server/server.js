@@ -1,0 +1,442 @@
+require('dotenv').config();
+const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL || 'https://db.cmkpehljymbmlsyvpolw.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'your-supabase-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Register endpoint
+app.post('/register', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Check if user already exists
+    const { data: existingUser, error: lookupError } = await supabase
+      .from('admin')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // Create new user
+    const { data: newUser, error: insertError } = await supabase
+      .from('admin')
+      .insert([
+        { 
+          email, 
+          password_hash: passwordHash 
+        }
+      ])
+      .select()
+      .single();
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({ 
+      message: 'User registered successfully',
+      user: {
+        id: newUser.id,
+        email: newUser.email
+      },
+      token
+    });
+  if (insertError) {
+      console.error('Supabase insert error:', insertError);
+      throw insertError;
+    }
+  } catch (error) {
+    console.error('Detailed registration error:', {
+      message: error.message,
+      code: error.code,
+      details: error.details
+    });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message // Send this only in development
+    });
+  }
+});
+
+app.get('/test-supabase', async (req, res) => {
+  try {
+    console.log('Testing Supabase connection...');
+    const { data, error } = await supabase.from('admin').select('*').limit(1);
+    
+    if (error) {
+      console.error('Supabase error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details
+      });
+      throw error;
+    }
+    
+    console.log('Supabase connection successful');
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Full test error:', error);
+    res.status(500).json({ 
+      error: 'Supabase test failed',
+      details: error.message 
+    });
+  }
+});
+
+// Login endpoint
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Case-insensitive email search
+    const { data: user, error: userError } = await supabase
+      .from('admin')
+      .select('*')
+      .ilike('email', email)  // Changed from .eq to .ilike for case-insensitive
+      .single();
+
+    if (userError || !user) {
+      console.error('User lookup error:', userError);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Check password
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Update last login
+    await supabase
+      .from('admin')
+      .update({ last_login: new Date().toISOString() })
+      .eq('id', user.id);
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Add this endpoint to your existing server code
+app.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { first_name, last_name, phone, address } = req.body;
+
+    // Validate input
+    if (!first_name || !last_name) {
+      return res.status(400).json({ error: 'First name and last name are required' });
+    }
+
+    // Update profile
+    const { data: updatedUser, error } = await supabase
+      .from('admin')
+      .update({ 
+        first_name,
+        last_name,
+        phone,
+        address,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Update this existing endpoint to include profile fields
+app.get('/profile', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const { data: user, error } = await supabase
+      .from('admin')
+      .select('id, email, first_name, last_name, phone, address, created_at, last_login')
+      .eq('id', userId)
+      .single();
+
+    if (error || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Profile error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Middleware to authenticate JWT token
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    req.user = user;
+    next();
+  });
+}
+
+// Add new member (default status: inactive)
+app.post('/members', authenticateToken, async (req, res) => {
+  try {
+    const {
+      name,
+      phone_number,
+      email,
+      sponsor_code,
+      sponsor_name,
+      package,
+      password
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !phone_number || !sponsor_code || !sponsor_name || !package || !password) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Generate unique member ID
+    const member_id = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Create new member (status defaults to inactive)
+    const { data: newMember, error } = await supabase
+      .from('members')
+      .insert([{
+        member_id,
+        name,
+        phone_number,
+        email: email || null,
+        sponsor_code,
+        sponsor_name,
+        package,
+        password, // Note: In production, you should hash this password
+        active_status: false // Default to inactive
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({
+      message: 'Member added successfully',
+      member: newMember
+    });
+  } catch (error) {
+    console.error('Add member error:', error);
+    res.status(500).json({ error: 'Failed to add member' });
+  }
+});
+
+// Get all members with pagination
+app.get('/members', authenticateToken, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = supabase
+      .from('members')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    // Add search filter if provided
+    if (search) {
+      query = query.or(
+        `name.ilike.%${search}%,member_id.ilike.%${search}%,phone_number.ilike.%${search}%`
+      );
+    }
+
+    const { data: members, error, count } = await query;
+
+    if (error) throw error;
+
+    res.json({
+      members,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit)
+    });
+  } catch (error) {
+    console.error('Get members error:', error);
+    res.status(500).json({ error: 'Failed to fetch members' });
+  }
+});
+
+// Update member status (active/inactive)
+app.patch('/members/:id/status', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { active_status } = req.body;
+
+    if (typeof active_status !== 'boolean') {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
+
+    const { data: updatedMember, error } = await supabase
+      .from('members')
+      .update({
+        active_status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      message: 'Member status updated successfully',
+      member: updatedMember
+    });
+  } catch (error) {
+    console.error('Update member status error:', error);
+    res.status(500).json({ error: 'Failed to update member status' });
+  }
+});
+
+
+// Get single member by ID
+app.get('/members/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data: member, error } = await supabase
+      .from('members')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    if (!member) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+
+    res.json(member);
+  } catch (error) {
+    console.error('Get member error:', error);
+    res.status(500).json({ error: 'Failed to fetch member' });
+  }
+});
+
+// Update member details
+app.put('/members/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      phone_number,
+      email,
+      sponsor_code,
+      sponsor_name,
+      package,
+      password,
+      date_of_joining
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !phone_number || !sponsor_code || !sponsor_name || !package || !password || !date_of_joining) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const { data: updatedMember, error } = await supabase
+      .from('members')
+      .update({
+        name,
+        phone_number,
+        email: email || null,
+        sponsor_code,
+        sponsor_name,
+        package,
+        password,
+        date_of_joining,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      message: 'Member updated successfully',
+      member: updatedMember
+    });
+  } catch (error) {
+    console.error('Update member error:', error);
+    res.status(500).json({ error: 'Failed to update member' });
+  }
+});
+
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
+
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
