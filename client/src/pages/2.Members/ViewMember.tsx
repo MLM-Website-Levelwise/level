@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   Filter,
@@ -11,142 +13,10 @@ import {
 } from "lucide-react";
 
 const ViewMember = () => {
-  // Sample data - replace with your actual data
-  const [members] = useState([
-    {
-      id: 1,
-      memberId: "245037",
-      name: "Vipul bhai",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Premium",
-      phoneNumber: "9913023612",
-      password: "123456",
-      doj: "2025-05-13",
-      activeStatus: "Inactive",
-    },
-    {
-      id: 2,
-      memberId: "949317",
-      name: "Raju Maity",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Gold",
-      phoneNumber: "7896720951",
-      password: "123456",
-      doj: "2025-03-01",
-      activeStatus: "Active",
-    },
-    {
-      id: 3,
-      memberId: "421098",
-      name: "Tapas Sett",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Silver",
-      phoneNumber: "8240229481",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 4,
-      memberId: "568189",
-      name: "Goutam Singh",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Premium",
-      phoneNumber: "9875584653",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 5,
-      memberId: "243752",
-      name: "mangal",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Basic",
-      phoneNumber: "1598753215",
-      password: "3897",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 6,
-      memberId: "731542",
-      name: "amit",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Gold",
-      phoneNumber: "988989898",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 7,
-      memberId: "876376",
-      name: "bipul",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Silver",
-      phoneNumber: "987456344",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 8,
-      memberId: "122977",
-      name: "biru",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Premium",
-      phoneNumber: "8617414838",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 9,
-      memberId: "148018",
-      name: "biru",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Basic",
-      phoneNumber: "8617414838",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 10,
-      memberId: "922924",
-      name: "Wazir",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Gold",
-      phoneNumber: "7017127812",
-      password: "123456",
-      doj: "2023-09-19",
-      activeStatus: "Active",
-    },
-    {
-      id: 11,
-      memberId: "891832",
-      name: "Abc",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Silver",
-      phoneNumber: "0000000000",
-      password: "1783",
-      doj: "2022-07-23",
-      activeStatus: "Active",
-    },
-  ]);
-
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -162,39 +32,73 @@ const ViewMember = () => {
     activeStatus: "",
   });
 
+  // Fetch members from API
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/members', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch members');
+        }
+        
+        const data = await response.json();
+        // Sort members by creation date (oldest first) for sequential SL No
+        const sortedMembers = data.members.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        setMembers(sortedMembers);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [toast]);
+
   // Filter and search logic
-  const filteredMembers = useMemo(() => {
-    return members.filter((member) => {
-      const matchesSearch =
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.memberId.includes(searchTerm) ||
-        member.phoneNumber.includes(searchTerm) ||
-        member.sponsorName.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredMembers = members.filter((member) => {
+    const matchesSearch =
+      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.member_id.includes(searchTerm) ||
+      member.phone_number.includes(searchTerm) ||
+      member.sponsor_name.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesDateFrom =
-        !filters.dateFrom || member.doj >= filters.dateFrom;
-      const matchesDateTo = !filters.dateTo || member.doj <= filters.dateTo;
-      const matchesPackage =
-        !filters.package || member.package === filters.package;
-      const matchesMemberCode =
-        !filters.memberCode || member.memberId.includes(filters.memberCode);
-      const matchesMemberName =
-        !filters.memberName ||
-        member.name.toLowerCase().includes(filters.memberName.toLowerCase());
-      const matchesActiveStatus =
-        !filters.activeStatus || member.activeStatus === filters.activeStatus;
+    const matchesDateFrom =
+      !filters.dateFrom || member.date_of_joining >= filters.dateFrom;
+    const matchesDateTo = !filters.dateTo || member.date_of_joining <= filters.dateTo;
+    const matchesPackage =
+      !filters.package || member.package === filters.package;
+    const matchesMemberCode =
+      !filters.memberCode || member.member_id.includes(filters.memberCode);
+    const matchesMemberName =
+      !filters.memberName ||
+      member.name.toLowerCase().includes(filters.memberName.toLowerCase());
+    const matchesActiveStatus =
+      !filters.activeStatus || 
+      (member.active_status ? "Active" : "Inactive") === filters.activeStatus;
 
-      return (
-        matchesSearch &&
-        matchesDateFrom &&
-        matchesDateTo &&
-        matchesPackage &&
-        matchesMemberCode &&
-        matchesMemberName &&
-        matchesActiveStatus
-      );
-    });
-  }, [members, searchTerm, filters]);
+    return (
+      matchesSearch &&
+      matchesDateFrom &&
+      matchesDateTo &&
+      matchesPackage &&
+      matchesMemberCode &&
+      matchesMemberName &&
+      matchesActiveStatus
+    );
+  });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
@@ -205,7 +109,7 @@ const ViewMember = () => {
   );
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
 
@@ -225,9 +129,58 @@ const ViewMember = () => {
     alert(`Exporting to ${type.toUpperCase()}...`);
   };
 
-  const handleAction = (action, member) => {
-    alert(`${action} action for member: ${member.name}`);
+  const handleAddMember = () => {
+    navigate('/members/add-member');
   };
+
+  const handleUpdateStatus = async (memberId, currentStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/members/${memberId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          active_status: !currentStatus
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+
+      const data = await response.json();
+      
+      // Update local state
+      setMembers(prev => prev.map(member => 
+        member.id === memberId ? { ...member, active_status: !currentStatus } : member
+      ));
+
+      toast({
+        title: "Success",
+        description: `Member status updated to ${!currentStatus ? 'Active' : 'Inactive'}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading members...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -255,7 +208,7 @@ const ViewMember = () => {
             {/* Action Buttons */}
             <div className="flex gap-2">
               <button
-                onClick={() => handleAction("Add", {})}
+                onClick={handleAddMember}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -345,10 +298,7 @@ const ViewMember = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All Packages</option>
-                    <option value="Basic">Basic</option>
-                    <option value="Silver">Silver</option>
-                    <option value="Gold">Gold</option>
-                    <option value="Premium">Premium</option>
+                    <option value="Elite">Elite</option>
                   </select>
                 </div>
                 <div>
@@ -453,29 +403,25 @@ const ViewMember = () => {
                   className="border-b border-gray-200 hover:bg-gray-50"
                 >
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {startIndex + index + 1}
+                    {members.findIndex(m => m.id === member.id) + 1}
                   </td>
                   <td className="px-4 py-3 text-sm text-blue-600 font-medium">
-                    {member.memberId}
+                    {member.member_id}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {member.name}
                   </td>
                   <td className="px-4 py-3 text-sm text-blue-600">
-                    {member.sponsorCode}
+                    {member.sponsor_code}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {member.sponsorName}
+                    {member.sponsor_name}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        member.package === "Premium"
+                        member.package === "Elite"
                           ? "bg-purple-100 text-purple-800"
-                          : member.package === "Gold"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : member.package === "Silver"
-                          ? "bg-gray-100 text-gray-800"
                           : "bg-blue-100 text-blue-800"
                       }`}
                     >
@@ -483,53 +429,44 @@ const ViewMember = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {member.phoneNumber}
+                    {member.phone_number}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {member.password}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {new Date(member.doj).toLocaleDateString("en-GB")}
+                    {new Date(member.date_of_joining).toLocaleDateString("en-GB")}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        member.activeStatus === "Active"
+                        member.active_status
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {member.activeStatus}
+                      {member.active_status ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleAction("Update", member)}
+                        onClick={() => navigate(`/members/edit-member/${member.id}`)}
                         className="text-blue-600 hover:text-blue-800 p-1 rounded"
-                        title="Update"
+                        title="Edit"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() =>
-                          handleAction(
-                            member.activeStatus === "Active"
-                              ? "Block"
-                              : "Unblock",
-                            member
-                          )
-                        }
+                        onClick={() => handleUpdateStatus(member.id, member.active_status)}
                         className={`p-1 rounded ${
-                          member.activeStatus === "Active"
+                          member.active_status
                             ? "text-red-600 hover:text-red-800"
                             : "text-green-600 hover:text-green-800"
                         }`}
-                        title={
-                          member.activeStatus === "Active" ? "Block" : "Unblock"
-                        }
+                        title={member.active_status ? "Deactivate" : "Activate"}
                       >
-                        {member.activeStatus === "Active" ? (
+                        {member.active_status ? (
                           <Ban className="w-4 h-4" />
                         ) : (
                           <UserCheck className="w-4 h-4" />

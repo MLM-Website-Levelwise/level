@@ -15,27 +15,36 @@ const Login = () => {
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simple validation
-    if (email === "admin@mlm.com" && password === "admin123") {
-      localStorage.setItem("isAuthenticated", "true");
-      toast({
-        title: "Login Successful",
-        description: "Welcome to MLM Admin Dashboard",
-      });
-      navigate("/dashboard");
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
-    }
+  try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || 'Login failed');
+
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("token", data.token); // If using JWT
     
+    toast({ title: "Login Successful", description: "Welcome!" });
+    navigate("/dashboard");
+    
+  } catch (error) {
+    toast({
+      title: "Login Failed",
+      description: error.message || "Invalid credentials",
+      variant: "destructive",
+    });
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-white p-4">
@@ -92,11 +101,6 @@ const Login = () => {
               </Button>
             </form>
 
-            <div className="mt-4 text-sm text-gray-600 text-center">
-              <p>Demo credentials:</p>
-              <p>Email: admin@mlm.com</p>
-              <p>Password: admin123</p>
-            </div>
           </CardContent>
         </Card>
       </div>

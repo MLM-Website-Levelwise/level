@@ -1,35 +1,83 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast";
 
 const AddMember = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
-    dateOfJoining: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+    dateOfJoining: new Date().toISOString().split('T')[0],
     mobileNo: '',
     emailId: '',
     sponsorCode: '',
     sponsorName: '',
-    position: ''
-  })
+    package: 'Elite', // Default to Elite package
+    password: '123456' // Default password
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/members', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone_number: formData.mobileNo,
+          email: formData.emailId || null,
+          sponsor_code: formData.sponsorCode,
+          sponsor_name: formData.sponsorName,
+          package: formData.package,
+          password: formData.password,
+          date_of_joining: formData.dateOfJoining
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add member');
+      }
+
+      toast({
+        title: "Success",
+        description: "Member added successfully",
+      });
+      
+      // Redirect to view members after successful addition
+      navigate('/members/view-members');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'F2') {
-      e.preventDefault()
-      handleSubmit(e as any)
+      e.preventDefault();
+      handleSubmit(e as any);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-200">
@@ -143,43 +191,55 @@ const AddMember = () => {
                     required
                   />
                 </div>
+
+                {/* Package */}
+                <div>
+                  <label className="block text-gray-700 text-sm mb-2">
+                    Package <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="package"
+                    value={formData.package}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="Elite">Elite</option>
+                  </select>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-gray-700 text-sm mb-2">
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    required
+                  />
+                </div>
               </div>
-
-              {/* Position
-              <div className="max-w-md">
-                <label className="block text-gray-700 text-sm mb-2">
-                  Position <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="position"
-                  value={formData.position}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
-                  required
-                >
-                  <option value="">Select</option>
-                  <option value="left">Left</option>
-                  <option value="right">Right</option>
-                </select>
-              </div> */}
-
-
             </div>
 
             {/* Submit Button */}
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                disabled={isSubmitting}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                Submit (F2)
+                {isSubmitting ? 'Submitting...' : 'Submit (F2)'}
               </button>
             </div>
           </form>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddMember
+export default AddMember;

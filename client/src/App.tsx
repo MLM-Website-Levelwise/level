@@ -16,6 +16,9 @@ import FundGenerate from "./pages/4.Fund/FundGenerate";
 import FundHistory from "./pages/4.Fund/FundHistory";
 
 import AddPackage from "./pages/5.Package/PackageManager";
+import {ProtectedRoute} from "./components/ProtectedRoute";
+
+import EditMember from "./components/EditMember";
 
 // import Index from "./pages/Index";
 // import MembersKYC from "./pages/MembersKYC";
@@ -36,6 +39,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedRoute />}>
           <Route
             path="/dashboard"
             element={
@@ -107,6 +111,15 @@ const App = () => (
             </AdminLayout>
           } /> */}
           {/* User Icons */}
+
+          <Route
+  path="/members/edit-member/:id"
+  element={
+    <AdminLayout>
+      <EditMember />
+    </AdminLayout>
+  }
+/>
           <Route
             path="/profile"
             element={
@@ -123,6 +136,7 @@ const App = () => (
               </AdminLayout>
             }
           />
+          </Route>
           {/* <Route path="/index" element={<Index />} />
           ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
