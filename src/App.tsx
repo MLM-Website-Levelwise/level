@@ -6,20 +6,22 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import AdminLayout from "./components/AdminLayout";
 import Login from "./pages/Login";
+// Dashbord
 import Dashboard from "./pages/Dashboard";
-
+// Member
 import AddMember from "./pages/2.Members/AddMember";
 import ViewMember from "./pages/2.Members/ViewMember";
 import DirectMember from "./pages/2.Members/DirectMember";
-
-import FundGenerate from "./pages/4.Fund/FundGenerate";
-import FundHistory from "./pages/4.Fund/FundHistory";
-
-import AddPackage from "./pages/5.Package/PackageManager";
-
-// import Index from "./pages/Index";
-// import MembersKYC from "./pages/MembersKYC";
-// import ActiveAutopool from "./pages/ActiveAutopool";
+// Geneology
+import LevelTeam from "./pages/3.Geneology/LevelTeam";
+import TreeTeam from "./pages/3.Geneology/TreeTeam";
+// Package
+import AddPackage from "./pages/4.Package/PackageManager";
+// Fund
+import FundGenerate from "./pages/5.Fund/FundGenerate";
+import FundHistory from "./pages/5.Fund/FundHistory";
+// Income
+// Withdrawal
 
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -44,6 +46,7 @@ const App = () => (
               </AdminLayout>
             }
           />
+          {/* Members */}
           <Route
             path="/members/add-member"
             element={
@@ -68,6 +71,34 @@ const App = () => (
               </AdminLayout>
             }
           />
+          {/* Geneology */}
+          <Route
+            path="/geneology/level-wise-team"
+            element={
+              <AdminLayout>
+                <LevelTeam />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/geneology/binary-team"
+            element={
+              <AdminLayout>
+                <TreeTeam />
+              </AdminLayout>
+            }
+          />
+
+          {/* Package */}
+          <Route
+            path="/package/add-package"
+            element={
+              <AdminLayout>
+                <AddPackage />
+              </AdminLayout>
+            }
+          />
+          {/* Fund */}
           <Route
             path="/master/fund-generate"
             element={
@@ -84,28 +115,8 @@ const App = () => (
               </AdminLayout>
             }
           />
-          <Route
-            path="/package/add-package"
-            element={
-              <AdminLayout>
-                <AddPackage />
-              </AdminLayout>
-            }
-          />
-          {/* <Route
-            path="/members-kyc"
-            element={
-              <AdminLayout>
-                <MembersKYC />
-              </AdminLayout>
-            }
-          /> */}
-          {/* 
-          <Route path="/active-autopool" element={
-            <AdminLayout>
-              <ActiveAutopool />
-            </AdminLayout>
-          } /> */}
+          {/* Income */}
+          {/* Withdrawal */}
           {/* User Icons */}
           <Route
             path="/profile"

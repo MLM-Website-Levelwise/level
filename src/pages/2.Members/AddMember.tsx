@@ -357,19 +357,6 @@ const AddMember = () => {
                   <option value="right">Right</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  PAN Number
-                </label>
-                <input
-                  type="text"
-                  name="panNumber"
-                  value={formData.panNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                />
-              </div>
             </div>
           </div>
 
@@ -397,31 +384,6 @@ const AddMember = () => {
                   className="absolute top-9 right-3 text-gray-600"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-
-              <div className="relative">
-                <label className="block text-sm font-medium mb-1">
-                  Confirm Password *
-                </label>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-md border-gray-300 pr-10 focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute top-9 right-3 text-gray-600"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
                 </button>
               </div>
             </div>

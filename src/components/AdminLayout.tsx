@@ -102,26 +102,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       ],
     },
     {
-      id: "package",
-      title: "Package",
-      icon: CreditCard,
+      id: "geneology",
+      title: "Geneology",
+      icon: UserCog,
       children: [
-        { title: "Add Package", path: "/package/add-package" },
-        { titile: "View Package", path: "/package/view-package" },
+        { title: "Level Wise Team", path: "/geneology/level-wise-team" },
+        { title: "Tree Wise Team", path: "/geneology/binary-team" },
       ],
     },
     {
-      id: "income",
-      title: "Income",
-      icon: TrendingUp,
-      children: [
-        { title: "Direct Income", path: "/income/direct-income" },
-        { title: "Level Income", path: "/income/level-income" },
-        { title: "Growth Income", path: "/income/growth-income" },
-        // { title: "Reward", path: "/master/reward" },
-        // { title: "Royalty", path: "/master/royalty" },
-        // { title: "News", path: "/master/news" },
-      ],
+      id: "package",
+      title: "Package",
+      icon: CreditCard,
+      children: [{ title: "Add Package", path: "/package/add-package" }],
     },
     {
       id: "fund",
@@ -133,11 +126,24 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       ],
     },
     {
-      id: "geneology",
-      title: "Geneology",
-      icon: Users,
+      id: "income",
+      title: "Income",
+      icon: TrendingUp,
       children: [
-        { title: "Level Wise Team", path: "/geneology/level-wise-team" },
+        { title: "Direct Income", path: "/income/direct-income" },
+        { title: "Level Income", path: "/income/level-income" },
+        { title: "Growth Income", path: "/income/growth-income" },
+      ],
+    },
+    {
+      id: "withdrawal",
+      title: "Withdrawal",
+      icon: DollarSign,
+      children: [
+        { title: "Todays Request", path: "/withdrawal/requests" },
+        { title: "Pending Request", path: "/withdrawal/pending-request" },
+        { title: "Total Payout", path: "/withdrawal/payouts" },
+        { title: "History", path: "/withdrawal/history" },
       ],
     },
     {
@@ -146,33 +152,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       icon: Building2,
       path: "/members-kyc",
     },
-    // {
-    //   id: "active-autopool",
-    //   title: "Active Autopool",
-    //   icon: TrendingUp,
-    //   path: "/active-autopool",
-    // },
-    // {
-    //   id: "income-history",
-    //   title: "Income History",
-    //   icon: Eye,
-    //   children: [
-    //     { title: "Matching Income", path: "/income/matching" },
-    //     { title: "Cashback Income", path: "/income/cashback" },
-    //     { title: "Sponsor Income", path: "/income/sponsor" },
-    //     { title: "Autopool Income", path: "/income/autopool" },
-    //     { title: "Royalty Income", path: "/income/royalty" },
-    //   ],
-    // },
-    // {
-    //   id: "ticket",
-    //   title: "Ticket",
-    //   icon: Ticket,
-    //   children: [
-    //     { title: "Pending Tickets", path: "/tickets/pending" },
-    //     { title: "Reply Tickets", path: "/tickets/reply" },
-    //   ],
-    // },
     {
       id: "setting",
       title: "Setting",
