@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import AddMember from "./pages/2.Members/AddMember";
 import ViewMember from "./pages/2.Members/ViewMember";
 import DirectMember from "./pages/2.Members/DirectMember";
+import AllDirectMem from "./pages/2.Members/AllDirectMem";
 
 import FundGenerate from "./pages/4.Fund/FundGenerate";
 import FundHistory from "./pages/4.Fund/FundHistory";
@@ -69,6 +70,15 @@ const App = () => (
             element={
               <AdminLayout>
                 <DirectMember />
+              </AdminLayout>
+            }
+          />
+
+          <Route
+            path="/members/allDir"
+            element={
+              <AdminLayout>
+                <AllDirectMem />
               </AdminLayout>
             }
           />

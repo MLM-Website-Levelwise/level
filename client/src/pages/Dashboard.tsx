@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Wallet, Target, Gift, Crown, FileText } from "lucide-react";
 
@@ -72,12 +72,13 @@ const Dashboard = () => {
       bgColor: "bg-pink-50"
     },
     {
-      title: "Total Autopool Amount",
+      title: "All Direct Members",
       value: "",
       icon: Crown,
       description: "Autopool earnings",
       color: "text-yellow-600",
-      bgColor: "bg-yellow-50"
+      bgColor: "bg-yellow-50",
+      link: "/members/allDir"  // Add this property
     },
     {
       title: "Total Royalty Amount",
@@ -132,24 +133,47 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow duration-200 border-purple-100">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">
-                {stat.title}
-              </CardTitle>
-              <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {stat.value || "0"}
-              </div>
-              <CardDescription className="text-xs text-gray-500">
-                {stat.description}
-              </CardDescription>
-            </CardContent>
-          </Card>
+          stat.link ? (
+            <Link to={stat.link} key={index}>
+              <Card className="hover:shadow-lg transition-shadow duration-200 border-purple-100 hover:border-purple-300 cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-700">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                    {stat.value || "0"}
+                  </div>
+                  <CardDescription className="text-xs text-gray-500">
+                    {stat.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            <Card key={index} className="hover:shadow-lg transition-shadow duration-200 border-purple-100">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-700">
+                  {stat.title}
+                </CardTitle>
+                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {stat.value || "0"}
+                </div>
+                <CardDescription className="text-xs text-gray-500">
+                  {stat.description}
+                </CardDescription>
+              </CardContent>
+            </Card>
+          )
         ))}
       </div>
     </div>

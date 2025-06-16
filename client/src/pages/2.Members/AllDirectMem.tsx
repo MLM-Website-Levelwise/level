@@ -9,7 +9,8 @@ import {
   Calendar,
   User,
   UserCheck,
-  DollarSign
+  DollarSign,
+  UserPlus
 } from "lucide-react";
 
 interface Member {
@@ -29,7 +30,7 @@ interface ApiResponse {
   total: number;
 }
 
-const DirectMember: React.FC = () => {
+const AdminReferredMembers: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
@@ -60,9 +61,10 @@ const DirectMember: React.FC = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:5000/direct-members?page=${currentPage}&limit=${itemsPerPage}`,
+          `http://localhost:5000/admin-referred-members?page=${currentPage}&limit=${itemsPerPage}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -154,7 +156,7 @@ const DirectMember: React.FC = () => {
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Direct Member List
+            Admin Referred Members
           </h1>
 
           {/* Top Controls */}
@@ -480,4 +482,4 @@ const DirectMember: React.FC = () => {
   );
 };
 
-export default DirectMember;
+export default AdminReferredMembers;

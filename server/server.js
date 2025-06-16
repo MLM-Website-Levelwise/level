@@ -431,6 +431,101 @@ app.put('/members/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Get direct members with pagination
+app.get('/direct-members', authenticateToken, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = supabase
+      .from('members')
+      .select('id, member_id, name, phone_number, email, sponsor_code, sponsor_name, package, active_status, date_of_joining, created_at', 
+        { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    // Add search filter if provided
+    if (search) {
+      query = query.or(
+        `name.ilike.%${search}%,member_id.ilike.%${search}%,phone_number.ilike.%${search}%`
+      );
+    }
+
+    const { data: members, error, count } = await query;
+
+    if (error) throw error;
+
+    // Format the response to match frontend expectations
+    const formattedMembers = members.map(member => ({
+      ...member,
+      sponsor_id: member.sponsor_code, // Map sponsor_code to sponsor_id
+      position: 'Left' // Default value, replace with your logic
+    }));
+
+    res.json({
+      members: formattedMembers,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit)
+    });
+  } catch (error) {
+    console.error('Get direct members error:', error);
+    res.status(500).json({ error: 'Failed to fetch direct members' });
+  }
+});
+
+// Helper function to determine position (implement your business logic)
+function determinePosition(member) {
+  // Example logic - replace with your actual business rules
+  return Math.random() > 0.5 ? "Left" : "Right";
+}
+
+// Get admin-referred members with pagination
+app.get('/admin-referred-members', authenticateToken, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = supabase
+      .from('members')
+      .select('id, member_id, name, phone_number, email, sponsor_code, sponsor_name, package, active_status, date_of_joining, created_at', 
+        { count: 'exact' })
+      .or('sponsor_name.ilike.%admin%,sponsor_code.ilike.%admin%')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    // Add search filter if provided
+    if (search) {
+      query = query.or(
+        `name.ilike.%${search}%,member_id.ilike.%${search}%,phone_number.ilike.%${search}%`
+      );
+    }
+
+    const { data: members, error, count } = await query;
+
+    if (error) throw error;
+
+    // Format the response to match frontend expectations
+    const formattedMembers = members.map(member => ({
+      ...member,
+      sponsor_id: member.sponsor_code,
+      position: 'Left' // Default value, replace with your logic
+    }));
+
+    res.json({
+      members: formattedMembers,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit)
+    });
+  } catch (error) {
+    console.error('Get admin-referred members error:', error);
+    res.status(500).json({ error: 'Failed to fetch admin-referred members' });
+  }
+});
+
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
