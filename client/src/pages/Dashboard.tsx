@@ -1,17 +1,47 @@
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Wallet, Target, Gift, Crown, FileText } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [directMembersIncome, setDirectMembersIncome] = useState<number | null>(null);
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("isAuthenticated");
     if (!isAuthenticated) {
       navigate("/login");
     }
+
+    // Fetch direct members income data
+    const fetchDirectMembersIncome = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          'http://localhost:5000/admin-referred-members',
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch direct members');
+        }
+        
+        const data = await response.json();
+        const MEMBERSHIP_PRICE = 6000;
+        const ADMIN_COMMISSION_PERCENTAGE = 5;
+        const income = (data.members.length * MEMBERSHIP_PRICE * ADMIN_COMMISSION_PERCENTAGE) / 100;
+        setDirectMembersIncome(income);
+      } catch (error) {
+        console.error('Error fetching direct members income:', error);
+        setDirectMembersIncome(0);
+      }
+    };
+
+    fetchDirectMembersIncome();
   }, [navigate]);
 
   const stats = [
@@ -73,12 +103,12 @@ const Dashboard = () => {
     },
     {
       title: "All Direct Members",
-      value: "",
+      value: directMembersIncome !== null ? directMembersIncome.toFixed(2) : "Loading...",
       icon: Crown,
       description: "Autopool earnings",
       color: "text-yellow-600",
       bgColor: "bg-yellow-50",
-      link: "/members/allDir"  // Add this property
+      link: "/members/allDir"
     },
     {
       title: "Total Royalty Amount",

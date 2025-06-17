@@ -102,6 +102,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       ],
     },
     {
+      id: "geneology",
+      title: "Geneology",
+      icon: UserCog,
+      children: [
+        { title: "Level Wise Team", path: "/geneology/level-wise-team" },
+        { title: "Tree Wise Team", path: "/geneology/binary-team" },
+      ],
+    },
+    {
       id: "master",
       title: "Master",
       icon: Settings,

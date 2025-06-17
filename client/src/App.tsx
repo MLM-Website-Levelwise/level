@@ -13,6 +13,9 @@ import ViewMember from "./pages/2.Members/ViewMember";
 import DirectMember from "./pages/2.Members/DirectMember";
 import AllDirectMem from "./pages/2.Members/AllDirectMem";
 
+import LevelTeam from "./pages/3.Geneology/LevelTeam";
+// import TreeTeam from "./pages/3.Geneology/TreeTeam";
+
 import FundGenerate from "./pages/4.Fund/FundGenerate";
 import FundHistory from "./pages/4.Fund/FundHistory";
 
@@ -79,6 +82,15 @@ const App = () => (
             element={
               <AdminLayout>
                 <AllDirectMem />
+              </AdminLayout>
+            }
+          />
+
+           <Route
+            path="/geneology/level-wise-team"
+            element={
+              <AdminLayout>
+                <LevelTeam />
               </AdminLayout>
             }
           />
