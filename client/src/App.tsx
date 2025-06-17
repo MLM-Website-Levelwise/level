@@ -14,7 +14,7 @@ import DirectMember from "./pages/2.Members/DirectMember";
 import AllDirectMem from "./pages/2.Members/AllDirectMem";
 
 import LevelTeam from "./pages/3.Geneology/LevelTeam";
-// import TreeTeam from "./pages/3.Geneology/TreeTeam";
+import TreeTeam from "./pages/3.Geneology/TreeTeam";
 
 import FundGenerate from "./pages/4.Fund/FundGenerate";
 import FundHistory from "./pages/4.Fund/FundHistory";
@@ -91,6 +91,14 @@ const App = () => (
             element={
               <AdminLayout>
                 <LevelTeam />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/geneology/binary-team"
+            element={
+              <AdminLayout>
+                <TreeTeam />
               </AdminLayout>
             }
           />

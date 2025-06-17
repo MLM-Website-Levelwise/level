@@ -239,7 +239,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Add new member (default status: inactive)
+// Add new member (updated with position field)
 app.post('/members', authenticateToken, async (req, res) => {
   try {
     const {
@@ -249,11 +249,12 @@ app.post('/members', authenticateToken, async (req, res) => {
       sponsor_code,
       sponsor_name,
       package,
-      password
+      password,
+      position // Add position field
     } = req.body;
 
     // Validate required fields
-    if (!name || !phone_number || !sponsor_code || !sponsor_name || !package || !password) {
+    if (!name || !phone_number || !sponsor_code || !sponsor_name || !package || !password || !position) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -271,8 +272,9 @@ app.post('/members', authenticateToken, async (req, res) => {
         sponsor_code,
         sponsor_name,
         package,
-        password, // Note: In production, you should hash this password
-        active_status: false // Default to inactive
+        password,
+        position, // Include position in insert
+        active_status: false
       }])
       .select()
       .single();
@@ -289,10 +291,60 @@ app.post('/members', authenticateToken, async (req, res) => {
   }
 });
 
-// Get all members with pagination
+// Update member details (updated with position field)
+app.put('/members/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      phone_number,
+      email,
+      sponsor_code,
+      sponsor_name,
+      package,
+      password,
+      date_of_joining,
+      position // Add position field
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !phone_number || !sponsor_code || !sponsor_name || !package || !password || !date_of_joining || !position) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const { data: updatedMember, error } = await supabase
+      .from('members')
+      .update({
+        name,
+        phone_number,
+        email: email || null,
+        sponsor_code,
+        sponsor_name,
+        package,
+        password,
+        date_of_joining,
+        position, // Include position in update
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      message: 'Member updated successfully',
+      member: updatedMember
+    });
+  } catch (error) {
+    console.error('Update member error:', error);
+    res.status(500).json({ error: 'Failed to update member' });
+  }
+});
+
 app.get('/members', authenticateToken, async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = '', member_id, sponsor_code } = req.query;
     const offset = (page - 1) * limit;
 
     let query = supabase
@@ -301,8 +353,11 @@ app.get('/members', authenticateToken, async (req, res) => {
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    // Add search filter if provided
-    if (search) {
+    if (member_id) {
+      query = query.eq('member_id', member_id);
+    } else if (sponsor_code) {
+      query = query.eq('sponsor_code', sponsor_code);
+    } else if (search) {
       query = query.or(
         `name.ilike.%${search}%,member_id.ilike.%${search}%,phone_number.ilike.%${search}%`
       );
@@ -325,113 +380,7 @@ app.get('/members', authenticateToken, async (req, res) => {
   }
 });
 
-// Update member status (active/inactive)
-app.patch('/members/:id/status', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { active_status } = req.body;
-
-    if (typeof active_status !== 'boolean') {
-      return res.status(400).json({ error: 'Invalid status value' });
-    }
-
-    const { data: updatedMember, error } = await supabase
-      .from('members')
-      .update({
-        active_status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({
-      message: 'Member status updated successfully',
-      member: updatedMember
-    });
-  } catch (error) {
-    console.error('Update member status error:', error);
-    res.status(500).json({ error: 'Failed to update member status' });
-  }
-});
-
-
-// Get single member by ID
-app.get('/members/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const { data: member, error } = await supabase
-      .from('members')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-
-    if (!member) {
-      return res.status(404).json({ error: 'Member not found' });
-    }
-
-    res.json(member);
-  } catch (error) {
-    console.error('Get member error:', error);
-    res.status(500).json({ error: 'Failed to fetch member' });
-  }
-});
-
-// Update member details
-app.put('/members/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      name,
-      phone_number,
-      email,
-      sponsor_code,
-      sponsor_name,
-      package,
-      password,
-      date_of_joining
-    } = req.body;
-
-    // Validate required fields
-    if (!name || !phone_number || !sponsor_code || !sponsor_name || !package || !password || !date_of_joining) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    const { data: updatedMember, error } = await supabase
-      .from('members')
-      .update({
-        name,
-        phone_number,
-        email: email || null,
-        sponsor_code,
-        sponsor_name,
-        package,
-        password,
-        date_of_joining,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({
-      message: 'Member updated successfully',
-      member: updatedMember
-    });
-  } catch (error) {
-    console.error('Update member error:', error);
-    res.status(500).json({ error: 'Failed to update member' });
-  }
-});
-
-// Get direct members with pagination
+// Get direct members with pagination (updated to include position)
 app.get('/direct-members', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query;
@@ -439,12 +388,11 @@ app.get('/direct-members', authenticateToken, async (req, res) => {
 
     let query = supabase
       .from('members')
-      .select('id, member_id, name, phone_number, email, sponsor_code, sponsor_name, package, active_status, date_of_joining, created_at', 
+      .select('id, member_id, name, phone_number, email, sponsor_code, sponsor_name, package, active_status, date_of_joining, created_at, position', 
         { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    // Add search filter if provided
     if (search) {
       query = query.or(
         `name.ilike.%${search}%,member_id.ilike.%${search}%,phone_number.ilike.%${search}%`
@@ -455,11 +403,10 @@ app.get('/direct-members', authenticateToken, async (req, res) => {
 
     if (error) throw error;
 
-    // Format the response to match frontend expectations
     const formattedMembers = members.map(member => ({
       ...member,
-      sponsor_id: member.sponsor_code, // Map sponsor_code to sponsor_id
-      position: 'Left' // Default value, replace with your logic
+      sponsor_id: member.sponsor_code,
+      position: member.position || 'Left' // Use actual position from DB
     }));
 
     res.json({
@@ -482,6 +429,7 @@ function determinePosition(member) {
 }
 
 // Get admin-referred members with pagination
+// Get admin-referred members with pagination (updated to include position)
 app.get('/admin-referred-members', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query;
@@ -489,13 +437,12 @@ app.get('/admin-referred-members', authenticateToken, async (req, res) => {
 
     let query = supabase
       .from('members')
-      .select('id, member_id, name, phone_number, email, sponsor_code, sponsor_name, package, active_status, date_of_joining, created_at', 
+      .select('id, member_id, name, phone_number, email, sponsor_code, sponsor_name, package, active_status, date_of_joining, created_at, position', 
         { count: 'exact' })
       .or('sponsor_name.ilike.%admin%,sponsor_code.ilike.%admin%')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    // Add search filter if provided
     if (search) {
       query = query.or(
         `name.ilike.%${search}%,member_id.ilike.%${search}%,phone_number.ilike.%${search}%`
@@ -506,11 +453,10 @@ app.get('/admin-referred-members', authenticateToken, async (req, res) => {
 
     if (error) throw error;
 
-    // Format the response to match frontend expectations
     const formattedMembers = members.map(member => ({
       ...member,
       sponsor_id: member.sponsor_code,
-      position: 'Left' // Default value, replace with your logic
+      position: member.position || 'Left' // Use actual position from DB
     }));
 
     res.json({
@@ -525,6 +471,49 @@ app.get('/admin-referred-members', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch admin-referred members' });
   }
 });
+
+
+// Update member status
+app.patch('/members/:id/status', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { active_status } = req.body;
+
+    // Validate input
+    if (typeof active_status !== 'boolean') {
+      return res.status(400).json({ error: 'Active status must be a boolean' });
+    }
+
+    // Update member status
+    const { data: updatedMember, error } = await supabase
+      .from('members')
+      .update({
+        active_status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Update status error:', error);
+      throw error;
+    }
+
+    if (!updatedMember) {
+      return res.status(404).json({ error: 'Member not found' });
+    }
+
+    res.json({
+      message: 'Member status updated successfully',
+      member: updatedMember
+    });
+  } catch (error) {
+    console.error('Update member status error:', error);
+    res.status(500).json({ error: 'Failed to update member status' });
+  }
+});
+
 
 app.get('/', (req, res) => {
   res.send('Server is running');

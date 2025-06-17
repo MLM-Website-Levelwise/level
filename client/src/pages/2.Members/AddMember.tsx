@@ -12,7 +12,7 @@ const AddMember = () => {
     emailId: '',
     sponsorCode: '',
     sponsorName: '',
-    package: 'Elite', // Default to Elite package
+    position: 'Left', // Default to Left position
     password: '123456' // Default password
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +42,8 @@ const AddMember = () => {
           email: formData.emailId || null,
           sponsor_code: formData.sponsorCode,
           sponsor_name: formData.sponsorName,
-          package: formData.package,
+          package: 'Basic', // Hardcoded as Basic
+          position: formData.position, // Added position
           password: formData.password,
           date_of_joining: formData.dateOfJoining
         })
@@ -192,19 +193,20 @@ const AddMember = () => {
                   />
                 </div>
 
-                {/* Package */}
+                {/* Position */}
                 <div>
                   <label className="block text-gray-700 text-sm mb-2">
-                    Package <span className="text-red-500">*</span>
+                    Position <span className="text-red-500">*</span>
                   </label>
                   <select
-                    name="package"
-                    value={formData.package}
+                    name="position"
+                    value={formData.position}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   >
-                    <option value="Elite">Elite</option>
+                    <option value="Left">Left</option>
+                    <option value="Right">Right</option>
                   </select>
                 </div>
 

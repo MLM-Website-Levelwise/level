@@ -343,9 +343,9 @@ const DirectMember: React.FC = () => {
                 <th className="px-4 py-3 text-center text-sm font-medium">
                   Status
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium">
+                {/* <th className="px-4 py-3 text-center text-sm font-medium">
                   Income (₹)
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody>
@@ -406,9 +406,9 @@ const DirectMember: React.FC = () => {
                         {member.status ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-center font-medium text-green-700">
+                    {/* <td className="px-4 py-3 text-sm text-center font-medium text-green-700">
                       ₹{calculateIncome().toFixed(2)}
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               )}
