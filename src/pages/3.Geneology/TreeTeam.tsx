@@ -553,6 +553,42 @@ const TreeWiseTeam = () => {
       rightBV: 1,
       position: "right",
     },
+    {
+      id: "421238",
+      name: "Tapan",
+      company: "Company Tapan",
+      dateOfJoin: "25/04/2021",
+      activeDate: "20/09/2025",
+      leftTeam: 0,
+      rightTeam: 1,
+      leftBV: 0,
+      rightBV: 1,
+      position: "left",
+    },
+    {
+      id: "123238",
+      name: "SahilIslam",
+      company: "Company Sahil",
+      dateOfJoin: "25/04/2021",
+      activeDate: "20/09/2025",
+      leftTeam: 0,
+      rightTeam: 1,
+      leftBV: 0,
+      rightBV: 1,
+      position: "right",
+    },
+    {
+      id: "892338",
+      name: "XXYYZZZ",
+      company: "Company XYZZ",
+      dateOfJoin: "25/04/2021",
+      activeDate: "20/09/2025",
+      leftTeam: 0,
+      rightTeam: 1,
+      leftBV: 0,
+      rightBV: 1,
+      position: "right",
+    },
   ];
 
   const handleSubmit = () => {
@@ -801,6 +837,36 @@ const TreeWiseTeam = () => {
                 </div>
                 <div className="absolute right-[208px]">
                   <MemberCard member={treeData[4]} level={3} />
+                </div>
+              </div>
+
+              {/* Vertical lines from level 3 to level 4 First*/}
+              <div className="absolute left-[240px] top-[440px] w-[1px] h-[20px] bg-gray-400 transform -translate-x-0.5"></div>
+              {/*Horizontal Level 3 to Level 4 */}
+              <div className="absolute left-[150px] top-[460px] w-[180px] h-[1px] bg-gray-400"></div>
+              <div className="absolute left-[150px] top-[460px] w-[1px] h-[32px] bg-gray-400"></div>
+              <div className="absolute left-[330px] top-[460px] w-[1px] h-[32px] bg-gray-400"></div>
+              {/* Vertical lines from level 3 to level 4 Second*/}
+              <div className="absolute right-[240px] top-[440px] w-[1px] h-[20px] bg-gray-400 transform -translate-x-0.5"></div>
+              {/*Horizontal Level 3 to Level 4 */}
+              <div className="absolute right-[150px] top-[460px] w-[180px] h-[1px] bg-gray-400"></div>
+              <div className="absolute right-[150px] top-[460px] w-[1px] h-[32px] bg-gray-400"></div>
+              <div className="absolute right-[330px] top-[460px] w-[1px] h-[32px] bg-gray-400"></div>
+
+              {/* Level 4 */}
+              <div className="relative mt-[61px] h-[100px]">
+                {" "}
+                <div className="absolute left-[120px]">
+                  <MemberCard member={treeData[5]} level={4} />
+                </div>
+                <div className="absolute left-[300px]">
+                  <MemberCard member={treeData[6]} level={4} />
+                </div>
+                <div className="absolute right-[300px]">
+                  <EmptySlot />
+                </div>
+                <div className="absolute right-[120px]">
+                  <MemberCard member={treeData[7]} level={4} />
                 </div>
               </div>
             </div>
