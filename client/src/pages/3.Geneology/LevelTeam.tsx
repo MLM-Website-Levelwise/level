@@ -66,45 +66,105 @@ const LevelTeam = () => {
 
   // Calculate levels for each member
   // Update the calculateLevels function in the LevelTeam component
-const calculateLevels = (members: Member[]): Member[] => {
-  // Create a map for quick lookup
+// Modified calculateLevels function to accept an optional rootMemberId
+const calculateLevels = (members: Member[], rootMemberId?: string): Member[] => {
   const memberMap = new Map<string, Member & { level?: number }>();
   members.forEach(member => {
     memberMap.set(member.member_id, { ...member });
   });
 
-  // Function to calculate level for a member
   const getLevel = (memberId: string): number => {
     const member = memberMap.get(memberId);
-    if (!member) return 0; // Shouldn't happen for valid members
+    if (!member) return 0;
     
-    // If level already calculated, return it
     if (member.level !== undefined) return member.level;
     
-    // If sponsored by admin, level is 1
-    if (member.sponsor_name.toLowerCase().includes('admin') || 
-        member.sponsor_code.toLowerCase().includes('admin')) {
+    // If this is the root member we're searching for, level is 1
+    if (rootMemberId && memberId === rootMemberId) {
       member.level = 1;
       return 1;
     }
     
+    // If sponsored by admin (and no root member specified), level is 1
+    if (!rootMemberId && 
+        (member.sponsor_name.toLowerCase().includes('admin') || 
+         member.sponsor_code.toLowerCase().includes('admin'))) {
+      member.level = 1;
+      return 1;
+    }
+    
+    // If sponsor not found, level is 0 (orphaned)
+    const sponsor = memberMap.get(member.sponsor_code);
+    if (!sponsor) {
+      member.level = 0;
+      return 0;
+    }
+    
     // Otherwise, level is sponsor's level + 1
     const sponsorLevel = getLevel(member.sponsor_code);
-    member.level = sponsorLevel + 1;
+    member.level = sponsorLevel > 0 ? sponsorLevel + 1 : 0;
     return member.level;
   };
 
-  // Calculate levels for all members
   members.forEach(member => {
     if (member.level === undefined) {
       member.level = getLevel(member.member_id);
     }
   });
 
+  // If we're searching by a root member, only return their downline (level > 0)
+  if (rootMemberId) {
+    return members
+      .filter(member => member.level && member.level > 0)
+      .map(member => ({
+        ...member,
+        level: member.level || 0
+      }));
+  }
+
   return members.map(member => ({
     ...member,
-    level: member.level || 0 // Ensure level is always defined
+    level: member.level || 0
   }));
+};
+const calculatePureDownline = (members: Member[], sponsorId: string): Member[] => {
+  const memberMap = new Map<string, Member>();
+  members.forEach(member => {
+    memberMap.set(member.member_id, { ...member });
+  });
+
+  // Verify sponsor exists (but don't include them in results)
+  if (!memberMap.has(sponsorId)) return [];
+
+  const downlineMembers: Member[] = [];
+  const queue: { memberId: string; level: number }[] = [];
+  
+  // Start with direct referrals (level 1)
+  const directReferrals = members.filter(m => m.sponsor_code === sponsorId);
+  directReferrals.forEach(ref => {
+    queue.push({ memberId: ref.member_id, level: 1 });
+  });
+
+  // Breadth-first search for indirect referrals
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const member = memberMap.get(current.memberId);
+    
+    if (member) {
+      downlineMembers.push({
+        ...member,
+        level: current.level
+      });
+
+      // Find referrals of this member
+      const referrals = members.filter(m => m.sponsor_code === current.memberId);
+      referrals.forEach(ref => {
+        queue.push({ memberId: ref.member_id, level: current.level + 1 });
+      });
+    }
+  }
+
+  return downlineMembers;
 };
 
   const handleFilterChange = (field: string, value: string) => {
@@ -114,53 +174,51 @@ const calculateLevels = (members: Member[]): Member[] => {
     }));
   };
 
-  const handleSubmit = () => {
-    let filtered = allTeamData;
+  // Modified handleSubmit function
+// Modified handleSubmit function
+const handleSubmit = () => {
+  let filtered: Member[] = [];
 
-    // Filter by member code
-    if (filters.memberCode.trim()) {
-      filtered = filtered.filter(
-        (item) =>
-          item.member_id
-            .toLowerCase()
-            .includes(filters.memberCode.toLowerCase()) ||
-          item.name.toLowerCase().includes(filters.memberCode.toLowerCase())
-      );
-    }
+  if (filters.memberCode.trim()) {
+    // Search mode - show only downline of specified member
+    filtered = calculatePureDownline(allTeamData, filters.memberCode);
+  } else {
+    // Default mode - show all with admin as root
+    filtered = calculateLevels(allTeamData)
+      .filter(m => !m.sponsor_name.toLowerCase().includes('admin'));
+  }
 
-    // Filter by date range
-    if (filters.dateFrom) {
-      filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.date_of_joining);
-        const fromDate = new Date(filters.dateFrom);
-        return itemDate >= fromDate;
-      });
-    }
+  // Apply other filters (date, level, status)
+  if (filters.dateFrom) {
+    filtered = filtered.filter(item => {
+      const itemDate = new Date(item.date_of_joining);
+      const fromDate = new Date(filters.dateFrom);
+      return itemDate >= fromDate;
+    });
+  }
 
-    if (filters.dateTo) {
-      filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.date_of_joining);
-        const toDate = new Date(filters.dateTo);
-        return itemDate <= toDate;
-      });
-    }
+  if (filters.dateTo) {
+    filtered = filtered.filter(item => {
+      const itemDate = new Date(item.date_of_joining);
+      const toDate = new Date(filters.dateTo);
+      return itemDate <= toDate;
+    });
+  }
 
-    // Filter by level
-    if (filters.levelNo !== "All") {
-      filtered = filtered.filter(
-        (item) => item.level === parseInt(filters.levelNo)
-      );
-    }
+  if (filters.levelNo !== "All") {
+    filtered = filtered.filter(
+      item => item.level === parseInt(filters.levelNo)
+    );
+  }
 
-    // Filter by status if export format is set to Active/InActive
-    if (exportFormat !== "All") {
-      filtered = filtered.filter(
-        (item) => item.active_status === (exportFormat === "Active")
-      );
-    }
+  if (exportFormat !== "All") {
+    filtered = filtered.filter(
+      item => item.active_status === (exportFormat === "Active")
+    );
+  }
 
-    setFilteredData(filtered);
-  };
+  setFilteredData(filtered);
+};
 
   const handleExport = (format: string) => {
     console.log(`Exporting data in ${format} format`);
