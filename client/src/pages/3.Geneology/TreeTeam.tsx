@@ -14,7 +14,7 @@ interface TeamMember {
   name: string;
   sponsor_code: string;
   sponsor_name: string;
-  position: "Left" | "Right";
+  position: "Left" | "Right" | "Center";
   date_of_joining: string;
   active_status: boolean;
   left?: TeamMember | null;
@@ -41,7 +41,7 @@ const MLMBinaryTree = () => {
         name: 'Admin',
         sponsor_code: '',
         sponsor_name: 'System',
-        position: 'Left',
+        position: 'Center',
         date_of_joining: new Date().toISOString(),
         active_status: true,
         left: null,
