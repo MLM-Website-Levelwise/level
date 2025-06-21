@@ -121,8 +121,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       title: "Fund",
       icon: DollarSign,
       children: [
-        { title: "Fund Generate", path: "/master/fund-generate" },
-        { title: "Fund History", path: "/master/fund-history" },
+        // { title: "Growth Fund", path: "/fund/growth-fund" },
+        // { title: "Profit Sharing Fund", path: "/fund/profitsharing-fund" },
+        { title: "Fund Generate", path: "/fund/fund-generate" },
+        { title: "Fund History", path: "/fund/fund-history" },
       ],
     },
     {

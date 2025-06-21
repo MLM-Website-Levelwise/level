@@ -1,19 +1,15 @@
 import React, { useState } from "react";
 import {
-  Wallet,
   User,
   Send,
   CheckCircle,
   AlertCircle,
   Loader,
-  CreditCard,
   ArrowRight,
-  RefreshCw,
-  ChevronDown,
+  DollarSign,
 } from "lucide-react";
 
 interface FormData {
-  transferType: "main" | "retopup";
   memberId: string;
   memberName: string;
   amount: string;
@@ -24,51 +20,48 @@ interface FormErrors {
   amount?: string;
 }
 
-interface Transaction {
-  transactionId: string;
+interface Invoice {
+  invoiceNumber: string;
   date: string;
   memberId: string;
   memberName: string;
-  transferType: string;
+  transactionType: string;
+  description: string;
   amount: number;
   timestamp: string;
 }
 
-const WalletTransfer: React.FC = () => {
+const ProfitSharingFund: React.FC = () => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
-    transferType: "main",
     memberId: "",
     memberName: "",
-    amount: "",
+    amount: "75", // Default to minimum amount
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetchingMember, setIsFetchingMember] = useState<boolean>(false);
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
 
-  // Simulate member name fetch
-  const fetchMemberName = async (memberId: string): Promise<string> => {
-    setIsFetchingMember(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Handle amount increment
+  const incrementAmount = () => {
+    const currentAmount = parseInt(formData.amount);
+    if (currentAmount < 450) {
+      const newAmount = currentAmount + 75;
+      setFormData({ ...formData, amount: newAmount.toString() });
+      if (errors.amount) setErrors({ ...errors, amount: undefined });
+    }
+  };
 
-    // Simulate member lookup
-    const memberNames = [
-      "John Smith",
-      "Sarah Johnson",
-      "Michael Brown",
-      "Emily Davis",
-      "David Wilson",
-      "Lisa Anderson",
-      "Robert Taylor",
-      "Jennifer Martinez",
-    ];
-
-    const randomName =
-      memberNames[Math.floor(Math.random() * memberNames.length)];
-    setIsFetchingMember(false);
-    return randomName;
+  // Handle amount decrement
+  const decrementAmount = () => {
+    const currentAmount = parseInt(formData.amount);
+    if (currentAmount > 75) {
+      const newAmount = currentAmount - 75;
+      setFormData({ ...formData, amount: newAmount.toString() });
+      if (errors.amount) setErrors({ ...errors, amount: undefined });
+    }
   };
 
   // Validation function
@@ -83,15 +76,15 @@ const WalletTransfer: React.FC = () => {
     }
 
     // Amount validation
-    if (!formData.amount.trim()) {
-      newErrors.amount = "Amount is required";
-    } else {
-      const amount = parseFloat(formData.amount);
-      if (isNaN(amount)) {
-        newErrors.amount = "Amount must be a valid number";
-      } else if (amount <= 0) {
-        newErrors.amount = "Amount must be greater than 0";
-      }
+    const amount = parseInt(formData.amount);
+    if (isNaN(amount)) {
+      newErrors.amount = "Amount must be a valid number";
+    } else if (amount < 75) {
+      newErrors.amount = "Minimum amount is $75";
+    } else if (amount > 450) {
+      newErrors.amount = "Maximum amount is $450";
+    } else if (amount % 75 !== 0) {
+      newErrors.amount = "Amount must be in multiples of $75";
     }
 
     setErrors(newErrors);
@@ -117,35 +110,45 @@ const WalletTransfer: React.FC = () => {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
 
-    // Clear transaction when form is modified
-    if (transaction) {
-      setTransaction(null);
+    // Clear invoice when form is modified
+    if (invoice) {
+      setInvoice(null);
     }
   };
 
-  // Handle transfer type change
-  const handleTransferTypeChange = (type: "main" | "retopup") => {
-    setFormData({
-      transferType: type,
-      memberId: "",
-      memberName: "",
-      amount: "",
-    });
-    setErrors({});
-    setTransaction(null);
+  // Simulate member name fetch
+  const fetchMemberName = async (memberId: string): Promise<string> => {
+    setIsFetchingMember(true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const memberNames = [
+      "John Smith",
+      "Sarah Johnson",
+      "Michael Brown",
+      "Emily Davis",
+      "David Wilson",
+      "Lisa Anderson",
+      "Robert Taylor",
+      "Jennifer Martinez",
+    ];
+
+    const randomName =
+      memberNames[Math.floor(Math.random() * memberNames.length)];
+    setIsFetchingMember(false);
+    return randomName;
   };
 
-  // Generate transaction
-  const generateTransaction = (): Transaction => {
-    const amount = parseFloat(formData.amount);
+  // Generate invoice
+  const generateInvoice = (): Invoice => {
+    const amount = parseInt(formData.amount);
 
     return {
-      transactionId: `TXN${Date.now()}`,
+      invoiceNumber: `INV${Date.now()}`,
       date: new Date().toLocaleDateString(),
       memberId: formData.memberId,
       memberName: formData.memberName,
-      transferType:
-        formData.transferType === "main" ? "Main Wallet" : "Re Top-up Wallet",
+      transactionType: "Profit Sharing Transfer",
+      description: `Profit sharing transfer of $${amount.toFixed(2)}`,
       amount,
       timestamp: new Date().toLocaleString(),
     };
@@ -160,18 +163,13 @@ const WalletTransfer: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Simulate processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const newTransaction = generateTransaction();
-      setTransaction(newTransaction);
-
-      // Clear form
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const newInvoice = generateInvoice();
+      setInvoice(newInvoice);
       setFormData({
-        transferType: formData.transferType,
         memberId: "",
         memberName: "",
-        amount: "",
+        amount: "75",
       });
     } catch (error) {
       console.error("Transaction failed:", error);
@@ -183,137 +181,56 @@ const WalletTransfer: React.FC = () => {
   // Reset form
   const handleReset = () => {
     setFormData({
-      transferType: formData.transferType,
       memberId: "",
       memberName: "",
-      amount: "",
+      amount: "75",
     });
     setErrors({});
-    setTransaction(null);
+    setInvoice(null);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-4">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Transfer Type Selector */}
+        {/* Transaction Type Selector */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-4">
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Select Transfer Type
+            Select Transaction Type
           </label>
           <div className="relative">
             <select
               onChange={(e) => {
                 const value = e.target.value;
-                if (value === "none") {
-                  setShowForm(false);
-                } else {
-                  handleTransferTypeChange(value as "main" | "retopup");
-                  setShowForm(true);
-                }
+                setShowForm(value === "profit-sharing");
               }}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none pr-10"
             >
-              <option value="none">Select an option</option>
-              <option value="main">Main Wallet Transfer</option>
-              <option value="retopup">Re Top-up Wallet Transfer</option>
+              <option value="">Select an option</option>
+              <option value="profit-sharing">Profit Sharing Transfer</option>
             </select>
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <ChevronDown className="w-5 h-5 text-gray-400" />
+              <ArrowRight className="w-5 h-5 text-gray-400" />
             </div>
           </div>
         </div>
 
-        {/* Transaction Display */}
-        {transaction && (
+        {/* Invoice Display */}
+        {invoice && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-4 border border-gray-200">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Transfer Successful
-                  </h3>
-                  <p className="text-gray-600">
-                    Transaction completed successfully
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Transaction #</p>
-                <p className="font-mono text-lg font-semibold">
-                  {transaction.transactionId}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  Transfer Details
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Date:</span>
-                    <span className="font-medium">{transaction.date}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Type:</span>
-                    <span className="font-medium">
-                      {transaction.transferType}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Member ID:</span>
-                    <span className="font-medium">{transaction.memberId}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Member Name:</span>
-                    <span className="font-medium">
-                      {transaction.memberName}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-2">
-                  Amount Transferred
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="text-lg font-semibold text-gray-900">
-                      Total Amount:
-                    </span>
-                    <span className="text-2xl font-bold text-green-600">
-                      ${transaction.amount.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-500">
-                Processed on: {transaction.timestamp}
-              </p>
-            </div>
+            {/* ... (keep existing invoice display code) ... */}
           </div>
         )}
 
-        {/* Main Form - Only shown when showForm is true */}
+        {/* Main Form */}
         {showForm && (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Form Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
               <h2 className="text-xl font-bold text-white mb-1">
-                {formData.transferType === "main"
-                  ? "Main Wallet Transfer"
-                  : "Re Top-up Wallet Transfer"}
+                Profit Sharing Fund Transfer
               </h2>
               <p className="text-blue-100 text-sm">
-                Transfer funds to another member's wallet
+                Transfer profit sharing amount to member (min $75, max $450, in
+                $75 increments)
               </p>
             </div>
 
@@ -367,31 +284,49 @@ const WalletTransfer: React.FC = () => {
                 </div>
               </div>
 
-              {/* Amount */}
+              {/* Amount Field with Number Input Style */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Amount in USD *
+                  Amount to Transfer *
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500">$</span>
+                <div className="flex items-center">
+                  {/* <button
+                    type="button"
+                    onClick={decrementAmount}
+                    disabled={parseInt(formData.amount) <= 75 || isLoading}
+                    className="px-3 py-1 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    -
+                  </button> */}
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mb-1">
+                      {/* <DollarSign className="h-5 w-5 text-gray-400" /> */}
+                    </div>
+                    <input
+                      type="number"
+                      min="75"
+                      max="450"
+                      step="75"
+                      value={formData.amount}
+                      onChange={(e) =>
+                        handleInputChange("amount", e.target.value)
+                      }
+                      className={`w-full text-center pl-10 pr-3 py-2 border-t border-b border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.amount
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-300"
+                      }`}
+                      disabled={isLoading}
+                    />
                   </div>
-                  <input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) =>
-                      handleInputChange("amount", e.target.value)
-                    }
-                    placeholder="Enter amount to transfer"
-                    className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                      errors.amount
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-300"
-                    }`}
-                    disabled={isLoading}
-                  />
+                  {/* <button
+                    type="button"
+                    onClick={incrementAmount}
+                    disabled={parseInt(formData.amount) >= 450 || isLoading}
+                    className="px-3 py-1 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    +
+                  </button> */}
                 </div>
                 {errors.amount && (
                   <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
@@ -399,7 +334,46 @@ const WalletTransfer: React.FC = () => {
                     {errors.amount}
                   </p>
                 )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Amount must be between $75 and $450 in $75 increments
+                </p>
               </div>
+
+              {/* Transaction Summary - Only shown when both fields are filled */}
+              {formData.memberId &&
+                formData.amount &&
+                !errors.memberId &&
+                !errors.amount && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 className="font-semibold text-sm text-blue-900 mb-2">
+                      Transaction Summary
+                    </h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">Recipient:</span>
+                        <span className="font-medium text-blue-900">
+                          {formData.memberName || "Not specified"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">Member ID:</span>
+                        <span className="font-medium text-blue-900">
+                          {formData.memberId}
+                        </span>
+                      </div>
+                      <div className="border-t border-blue-200 pt-2 mt-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold text-blue-900">
+                            Transfer Amount:
+                          </span>
+                          <span className="text-xl font-bold text-blue-900">
+                            ${parseInt(formData.amount).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
               {/* Action Buttons */}
               <div className="flex gap-3">
@@ -437,4 +411,4 @@ const WalletTransfer: React.FC = () => {
   );
 };
 
-export default WalletTransfer;
+export default ProfitSharingFund;

@@ -20,6 +20,8 @@ import AddPackage from "./pages/4.Package/PackageManager";
 // Fund
 import FundGenerate from "./pages/5.Fund/FundGenerate";
 import FundHistory from "./pages/5.Fund/FundHistory";
+import GrowthFund from "./pages/5.Fund/GrowthFund";
+import ProfitSharingFund from "./pages/5.Fund/ProfitSharingFund";
 // Income
 // Withdrawal
 
@@ -99,8 +101,24 @@ const App = () => (
             }
           />
           {/* Fund */}
+          {/* <Route
+            path="/fund/growth-fund"
+            element={
+              <AdminLayout>
+                <GrowthFund />
+              </AdminLayout>
+            }
+          />
           <Route
-            path="/master/fund-generate"
+            path="/fund/profitsharing-fund"
+            element={
+              <AdminLayout>
+                <ProfitSharingFund />
+              </AdminLayout>
+            }
+          /> */}
+          <Route
+            path="/fund/fund-generate"
             element={
               <AdminLayout>
                 <FundGenerate />
@@ -108,7 +126,7 @@ const App = () => (
             }
           />
           <Route
-            path="/master/fund-history"
+            path="/fund/fund-history"
             element={
               <AdminLayout>
                 <FundHistory />

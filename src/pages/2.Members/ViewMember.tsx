@@ -19,10 +19,11 @@ const ViewMember = () => {
       name: "Vipul bhai",
       sponsorCode: "100001",
       sponsorName: "Company 1",
-      package: "Premium",
+      topupAmount: 5000,
       phoneNumber: "9913023612",
       password: "123456",
       doj: "2025-05-13",
+      topupDate: "2025-05-14",
       activeStatus: "Inactive",
     },
     {
@@ -31,10 +32,11 @@ const ViewMember = () => {
       name: "Raju Maity",
       sponsorCode: "100001",
       sponsorName: "Company 1",
-      package: "Gold",
+      topupAmount: 5000,
       phoneNumber: "7896720951",
       password: "123456",
       doj: "2025-03-01",
+      topupDate: "2025-05-14",
       activeStatus: "Active",
     },
     {
@@ -43,10 +45,12 @@ const ViewMember = () => {
       name: "Tapas Sett",
       sponsorCode: "100001",
       sponsorName: "Company 1",
-      package: "Silver",
+      // package: "Silver",
+      topupAmount: 5000,
       phoneNumber: "8240229481",
       password: "123456",
       doj: "2023-09-29",
+      topupDate: "2025-05-14",
       activeStatus: "Active",
     },
     {
@@ -55,10 +59,12 @@ const ViewMember = () => {
       name: "Goutam Singh",
       sponsorCode: "100001",
       sponsorName: "Company 1",
-      package: "Premium",
+      // package: "Premium",
+      topupAmount: 5000,
       phoneNumber: "9875584653",
       password: "123456",
       doj: "2023-09-29",
+      topupDate: "2025-05-14",
       activeStatus: "Active",
     },
     {
@@ -67,84 +73,86 @@ const ViewMember = () => {
       name: "mangal",
       sponsorCode: "100001",
       sponsorName: "Company 1",
-      package: "Basic",
+      // package: "Basic",
+      topupAmount: 5000,
       phoneNumber: "1598753215",
       password: "3897",
       doj: "2023-09-29",
+      topupDate: "2025-05-14",
       activeStatus: "Active",
     },
-    {
-      id: 6,
-      memberId: "731542",
-      name: "amit",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Gold",
-      phoneNumber: "988989898",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 7,
-      memberId: "876376",
-      name: "bipul",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Silver",
-      phoneNumber: "987456344",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 8,
-      memberId: "122977",
-      name: "biru",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Premium",
-      phoneNumber: "8617414838",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 9,
-      memberId: "148018",
-      name: "biru",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Basic",
-      phoneNumber: "8617414838",
-      password: "123456",
-      doj: "2023-09-29",
-      activeStatus: "Active",
-    },
-    {
-      id: 10,
-      memberId: "922924",
-      name: "Wazir",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Gold",
-      phoneNumber: "7017127812",
-      password: "123456",
-      doj: "2023-09-19",
-      activeStatus: "Active",
-    },
-    {
-      id: 11,
-      memberId: "891832",
-      name: "Abc",
-      sponsorCode: "100001",
-      sponsorName: "Company 1",
-      package: "Silver",
-      phoneNumber: "0000000000",
-      password: "1783",
-      doj: "2022-07-23",
-      activeStatus: "Active",
-    },
+    // {
+    //   id: 6,
+    //   memberId: "731542",
+    //   name: "amit",
+    //   sponsorCode: "100001",
+    //   sponsorName: "Company 1",
+    //   package: "Gold",
+    //   phoneNumber: "988989898",
+    //   password: "123456",
+    //   doj: "2023-09-29",
+    //   activeStatus: "Active",
+    // },
+    // {
+    //   id: 7,
+    //   memberId: "876376",
+    //   name: "bipul",
+    //   sponsorCode: "100001",
+    //   sponsorName: "Company 1",
+    //   package: "Silver",
+    //   phoneNumber: "987456344",
+    //   password: "123456",
+    //   doj: "2023-09-29",
+    //   activeStatus: "Active",
+    // },
+    // {
+    //   id: 8,
+    //   memberId: "122977",
+    //   name: "biru",
+    //   sponsorCode: "100001",
+    //   sponsorName: "Company 1",
+    //   package: "Premium",
+    //   phoneNumber: "8617414838",
+    //   password: "123456",
+    //   doj: "2023-09-29",
+    //   activeStatus: "Active",
+    // },
+    // {
+    //   id: 9,
+    //   memberId: "148018",
+    //   name: "biru",
+    //   sponsorCode: "100001",
+    //   sponsorName: "Company 1",
+    //   package: "Basic",
+    //   phoneNumber: "8617414838",
+    //   password: "123456",
+    //   doj: "2023-09-29",
+    //   activeStatus: "Active",
+    // },
+    // {
+    //   id: 10,
+    //   memberId: "922924",
+    //   name: "Wazir",
+    //   sponsorCode: "100001",
+    //   sponsorName: "Company 1",
+    //   package: "Gold",
+    //   phoneNumber: "7017127812",
+    //   password: "123456",
+    //   doj: "2023-09-19",
+    //   activeStatus: "Active",
+    // },
+    // {
+    //   id: 11,
+    //   memberId: "891832",
+    //   name: "Abc",
+    //   sponsorCode: "100001",
+    //   sponsorName: "Company 1",
+    //   package: "Silver",
+    //   phoneNumber: "0000000000",
+    //   password: "1783",
+    //   doj: "2022-07-23",
+    //   activeStatus: "Active",
+    // },
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -156,7 +164,7 @@ const ViewMember = () => {
   const [filters, setFilters] = useState({
     dateFrom: "",
     dateTo: "",
-    package: "",
+    // topupAmount: "",
     memberCode: "",
     memberName: "",
     activeStatus: "",
@@ -174,8 +182,8 @@ const ViewMember = () => {
       const matchesDateFrom =
         !filters.dateFrom || member.doj >= filters.dateFrom;
       const matchesDateTo = !filters.dateTo || member.doj <= filters.dateTo;
-      const matchesPackage =
-        !filters.package || member.package === filters.package;
+      // const matchesTopupAmount =
+      //   !filters.topupAmount || member.topupAmount === filters.topupAmount;
       const matchesMemberCode =
         !filters.memberCode || member.memberId.includes(filters.memberCode);
       const matchesMemberName =
@@ -188,7 +196,7 @@ const ViewMember = () => {
         matchesSearch &&
         matchesDateFrom &&
         matchesDateTo &&
-        matchesPackage &&
+        // matchesTopupAmount &&
         matchesMemberCode &&
         matchesMemberName &&
         matchesActiveStatus
@@ -213,7 +221,7 @@ const ViewMember = () => {
     setFilters({
       dateFrom: "",
       dateTo: "",
-      package: "",
+      // topupAmount: "",
       memberCode: "",
       memberName: "",
       activeStatus: "",
@@ -333,12 +341,12 @@ const ViewMember = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Package
+                    Top-Up Amount
                   </label>
                   <select
-                    value={filters.package}
+                    value={filters.topupAmount}
                     onChange={(e) =>
                       handleFilterChange("package", e.target.value)
                     }
@@ -350,7 +358,7 @@ const ViewMember = () => {
                     <option value="Gold">Gold</option>
                     <option value="Premium">Premium</option>
                   </select>
-                </div>
+                </div> */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Member Code
@@ -429,7 +437,7 @@ const ViewMember = () => {
                   Sponsor Name
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium">
-                  Package
+                  Top-up Amount
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Phone Number
@@ -438,6 +446,10 @@ const ViewMember = () => {
                   Password
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium">DOJ</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">
+                  Top-up Date
+                </th>
+
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Active Status
                 </th>
@@ -468,7 +480,7 @@ const ViewMember = () => {
                     {member.sponsorName}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <span
+                    {/* <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         member.package === "Premium"
                           ? "bg-purple-100 text-purple-800"
@@ -480,7 +492,8 @@ const ViewMember = () => {
                       }`}
                     >
                       {member.package}
-                    </span>
+                    </span> */}
+                    ₹{member.topupAmount.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {member.phoneNumber}
@@ -491,6 +504,10 @@ const ViewMember = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {new Date(member.doj).toLocaleDateString("en-GB")}
                   </td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    {new Date(member.topupDate).toLocaleDateString("en-GB")}
+                  </td>
+
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
