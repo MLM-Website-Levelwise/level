@@ -192,51 +192,52 @@ const ViewMember = () => {
           </h1>
 
           {/* Top Controls */}
-          <div className="flex flex-wrap gap-4 items-center justify-between mb-4">
-            {/* Search */}
-            <div className="relative flex-1 min-w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search members..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+  {/* Search */}
+  <div className="relative w-full sm:max-w-xs">
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+    <input
+      type="text"
+      placeholder="Search members..."
+      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+  </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddMember}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add
-              </button>
-              <button
-                onClick={() => handleExport("excel")}
-                className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" />
-                Excel
-              </button>
-              <button
-                onClick={() => handleExport("pdf")}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                PDF
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <Filter className="w-4 h-4" />
-                Filter
-              </button>
-            </div>
-          </div>
+  {/* Action Buttons */}
+  <div className="flex flex-wrap justify-end gap-2">
+    <button
+      onClick={handleAddMember}
+      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+    >
+      <Plus className="w-4 h-4" />
+      Add
+    </button>
+    <button
+      onClick={() => handleExport("excel")}
+      className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+    >
+      <FileText className="w-4 h-4" />
+      Excel
+    </button>
+    <button
+      onClick={() => handleExport("pdf")}
+      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
+    >
+      <Download className="w-4 h-4" />
+      PDF
+    </button>
+    <button
+      onClick={() => setShowFilters(!showFilters)}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+    >
+      <Filter className="w-4 h-4" />
+      Filter
+    </button>
+  </div>
+</div>
+
 
           {/* Items per page */}
           <div className="flex items-center gap-2">

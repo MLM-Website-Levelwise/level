@@ -158,57 +158,58 @@ const DirectMember: React.FC = () => {
           </h1>
 
           {/* Top Controls */}
-          <div className="flex flex-wrap gap-4 items-center justify-between mb-4">
-            {/* Stats */}
-            <div className="flex gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-600" />
-                <span className="text-gray-600">Total Members: </span>
-                <span className="font-semibold text-blue-600">
-                  {totalMembers}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-green-600" />
-                <span className="text-gray-600">Active: </span>
-                <span className="font-semibold text-green-600">
-                  {members.filter((m) => m.status).length}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-purple-600" />
-                <span className="text-gray-600">Total Income: </span>
-                <span className="font-semibold text-purple-600">
-                  ₹{(members.length * calculateIncome()).toFixed(2)}
-                </span>
-              </div>
-            </div>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+  {/* Stats */}
+  <div className="flex flex-col sm:flex-row flex-wrap gap-4 text-sm">
+    <div className="flex items-center gap-2">
+      <User className="w-4 h-4 text-blue-600" />
+      <span className="text-gray-600">Total Members:</span>
+      <span className="font-semibold text-blue-600">
+        {totalMembers}
+      </span>
+    </div>
+    <div className="flex items-center gap-2">
+      <UserCheck className="w-4 h-4 text-green-600" />
+      <span className="text-gray-600">Active:</span>
+      <span className="font-semibold text-green-600">
+        {members.filter((m) => m.status).length}
+      </span>
+    </div>
+    <div className="flex items-center gap-2">
+      <DollarSign className="w-4 h-4 text-purple-600" />
+      <span className="text-gray-600">Total Income:</span>
+      <span className="font-semibold text-purple-600">
+        ₹{(members.length * calculateIncome()).toFixed(2)}
+      </span>
+    </div>
+  </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleExport("excel")}
-                className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" />
-                Excel
-              </button>
-              <button
-                onClick={() => handleExport("pdf")}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                PDF
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <Filter className="w-4 h-4" />
-                {showFilters ? "Hide Filters" : "Show Filters"}
-              </button>
-            </div>
-          </div>
+  {/* Buttons */}
+  <div className="flex flex-wrap justify-start sm:justify-end gap-2">
+    <button
+      onClick={() => handleExport("excel")}
+      className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+    >
+      <FileText className="w-4 h-4" />
+      Excel
+    </button>
+    <button
+      onClick={() => handleExport("pdf")}
+      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
+    >
+      <Download className="w-4 h-4" />
+      PDF
+    </button>
+    <button
+      onClick={() => setShowFilters(!showFilters)}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+    >
+      <Filter className="w-4 h-4" />
+      {showFilters ? "Hide Filters" : "Show Filters"}
+    </button>
+  </div>
+</div>
+
 
           {/* Items per page */}
           <div className="flex items-center gap-2 mb-4">
