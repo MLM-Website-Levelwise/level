@@ -37,7 +37,7 @@ const ViewMember = () => {
     const fetchMembers = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/members', {
+        const response = await fetch('https://user-qn5p.onrender.com/members', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -136,7 +136,7 @@ const ViewMember = () => {
   const handleUpdateStatus = async (memberId, currentStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/members/${memberId}/status`, {
+      const response = await fetch(`https://user-qn5p.onrender.com/members/${memberId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

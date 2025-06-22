@@ -62,7 +62,7 @@ const DirectMember: React.FC = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:5000/direct-members?page=${currentPage}&limit=${itemsPerPage}`,
+          `https://user-qn5p.onrender.com/direct-members?page=${currentPage}&limit=${itemsPerPage}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`

@@ -1,9 +1,10 @@
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 1rem; /* use smaller padding */
+  text-align: left; /* center may misalign flex or grid */
 }
+
 
 .logo {
   height: 6em;

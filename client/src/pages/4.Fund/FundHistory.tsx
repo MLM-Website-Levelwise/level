@@ -58,7 +58,7 @@ const FundHistory = () => {
       }
 
       const response = await axios.get(
-        "http://localhost:5000/admin-wallet-transactions",
+        "https://user-qn5p.onrender.com/admin-wallet-transactions",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -185,7 +185,7 @@ const FundHistory = () => {
       }
 
       await axios.put(
-        "http://localhost:5000/update-wallet-transaction",
+        "https://user-qn5p.onrender.com/update-wallet-transaction",
         {
           transactionId: editModal.transaction.id,
           newAmount,

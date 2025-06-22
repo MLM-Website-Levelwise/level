@@ -30,7 +30,7 @@ const AddMember = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5000/members', {
+      const response = await fetch('https://user-qn5p.onrender.com/members', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const AddMember = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-200">
+    <div className="min-h-screen flex w-full bg-gray-50">
       {/* Header */}
       <div className="bg-purple-600 text-white px-6 py-4">
         <h1 className="text-xl font-medium">Membership Form</h1>

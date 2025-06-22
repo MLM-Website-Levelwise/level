@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { User } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://user-qn5p.onrender.com";
 
 interface TeamMember {
   id: number;
