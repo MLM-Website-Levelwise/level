@@ -9,7 +9,7 @@ import {
   Plus,
   Edit,
   Ban,
-  UserCheck,
+  UserCheck,FileSpreadsheet, Printer
 } from "lucide-react";
 
 const ViewMember = () => {
@@ -208,26 +208,28 @@ const ViewMember = () => {
   {/* Action Buttons */}
   <div className="flex flex-wrap justify-end gap-2">
     <button
-      onClick={handleAddMember}
-      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
-    >
-      <Plus className="w-4 h-4" />
-      Add
-    </button>
-    <button
-      onClick={() => handleExport("excel")}
-      className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
-    >
-      <FileText className="w-4 h-4" />
-      Excel
-    </button>
-    <button
-      onClick={() => handleExport("pdf")}
-      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
-    >
-      <Download className="w-4 h-4" />
-      PDF
-    </button>
+        onClick={() => handleExport("excel")}
+        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
+        title="Export to Excel"
+      >
+        <FileSpreadsheet size={16} />
+      </button>
+
+      <button
+        onClick={() => handleExport("pdf")}
+        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
+        title="Export to PDF"
+      >
+        <FileText size={16} />
+      </button>
+
+      <button
+        onClick={() => handleExport("print")}
+        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+        title="Print"
+      >
+        <Printer size={16} />
+      </button>
     <button
       onClick={() => setShowFilters(!showFilters)}
       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
