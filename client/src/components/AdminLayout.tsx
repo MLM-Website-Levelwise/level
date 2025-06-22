@@ -26,16 +26,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ Added
+import { useToast } from "@/components/ui/use-toast"; // ✅ Added
 import { ReactNode } from "react";
-
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(true); // default hidden on mobile
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,7 +80,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const handleNavigate = (path: string) => {
     navigate(path);
-    setIsCollapsed(true); // auto-close on mobile navigation
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -116,7 +114,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       id: "master",
       title: "Master",
       icon: Settings,
-      children: [],
+      children: [
+        // { title: "Withdraw Status", path: "/master/withdraw-status" },
+        // { title: "Cashback Status", path: "/master/cashback-status" },
+        // { title: "Package Setting", path: "/master/package-setting" },
+        // { title: "Reward", path: "/master/reward" },
+        // { title: "Royalty", path: "/master/royalty" },
+        // { title: "News", path: "/master/news" },
+      ],
     },
     {
       id: "package",
@@ -181,36 +186,34 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Mobile Overlay */}
-      {isCollapsed === false && (
-        <div
-          className="fixed inset-0 z-30 bg-black bg-opacity-40 md:hidden"
-          onClick={() => setIsCollapsed(true)}
-        />
-      )}
-
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <div
-        className={`fixed z-40 inset-y-0 left-0 transform transition-transform duration-300 w-64 bg-purple-700 text-white flex flex-col md:relative md:translate-x-0 ${
-          isCollapsed ? "-translate-x-full md:translate-x-0" : "translate-x-0"
-        }`}
+        className={`${
+          isCollapsed ? "w-16" : "w-64"
+        } bg-purple-700 text-white transition-all duration-300 flex flex-col`}
       >
         {/* Sidebar Header */}
-        <div className="h-16 px-4 border-b border-purple-600 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <span className="text-purple-700 font-bold text-sm">MLM</span>
+        <div className="h-16 px-4 border-b border-purple-600 flex items-center justify-between flex-shrink-0">
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <span className="text-purple-700 font-bold text-sm">MLM</span>
+              </div>
+              <span className="font-semibold text-white">Admin Panel</span>
             </div>
-            <span className="font-semibold text-white">Admin Panel</span>
-          </div>
+          )}
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsCollapsed(true)}
-            className="p-2 text-white hover:bg-purple-600 md:hidden"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 text-white hover:bg-purple-600"
           >
-            <X className="h-4 w-4" />
+            {isCollapsed ? (
+              <Menu className="h-4 w-4" />
+            ) : (
+              <X className="h-4 w-4" />
+            )}
           </Button>
         </div>
 
@@ -219,33 +222,41 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           <div className="space-y-1">
             {menuItems.map((item) => (
               <div key={item.id}>
-                {item.children && item.children.length > 0 ? (
+                {item.children ? (
                   <>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-white text-base h-11 px-3"
+                      className={`w-full justify-start text-white text-base h-11 px-3 transition-colors duration-200 ${
+                        expandedMenus.includes(item.id)
+                          ? "hover:bg-white hover:text-purple-700"
+                          : "hover:bg-white hover:text-purple-700"
+                      }`}
                       onClick={() => toggleMenu(item.id)}
                     >
                       <item.icon className="h-5 w-5 flex-shrink-0" />
-                      <span className="ml-3 flex-1 text-left">
-                        {item.title}
-                      </span>
-                      <div className="flex-shrink-0">
-                        {expandedMenus.includes(item.id) ? (
-                          <ChevronDown className="h-5 w-5" />
-                        ) : (
-                          <ChevronRight className="h-5 w-5" />
-                        )}
-                      </div>
+                      {!isCollapsed && (
+                        <>
+                          <span className="ml-3 flex-1 text-left">
+                            {item.title}
+                          </span>
+                          <div className="flex-shrink-0">
+                            {expandedMenus.includes(item.id) ? (
+                              <ChevronDown className="h-5 w-5" />
+                            ) : (
+                              <ChevronRight className="h-5 w-5" />
+                            )}
+                          </div>
+                        </>
+                      )}
                     </Button>
 
-                    {expandedMenus.includes(item.id) && (
+                    {expandedMenus.includes(item.id) && !isCollapsed && (
                       <div className="ml-8 mt-1 space-y-1">
                         {item.children.map((child) => (
                           <Button
                             key={child.path}
                             variant="ghost"
-                            className={`w-full justify-start text-white text-base h-11 px-3 ${
+                            className={`w-full justify-start text-white text-base h-11 px-3 transition-colors duration-200 ${
                               isActive(child.path)
                                 ? "bg-white text-purple-700"
                                 : "hover:bg-white hover:text-purple-700"
@@ -263,15 +274,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 ) : (
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start text-white text-sm h-10 px-3 ${
+                    className={`w-full justify-start text-white text-sm h-10 px-3 transition-colors duration-200 ${
                       isActive(item.path)
                         ? "bg-white text-purple-700"
                         : "hover:bg-white hover:text-purple-700"
                     }`}
-                    onClick={() => handleNavigate(item.path!)}
+                    onClick={() => handleNavigate(item.path)}
                   >
                     <item.icon className="h-5 w-5 flex-shrink-0" />
-                    <span className="ml-3 flex-1 text-left">{item.title}</span>
+                    {!isCollapsed && (
+                      <span className="ml-3 flex-1 text-left">
+                        {item.title}
+                      </span>
+                    )}
                   </Button>
                 )}
               </div>
@@ -280,76 +295,63 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </ScrollArea>
 
         {/* Logout Button */}
-        <div className="p-3 border-t border-purple-600">
+        <div className="p-3 border-t border-purple-600 flex-shrink-0">
           <Button
             variant="ghost"
             className="w-full justify-start hover:bg-red-600 hover:text-white text-white text-base h-11 px-3"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
-            <span className="ml-3 flex-1 text-left">Logout</span>
+            {!isCollapsed && (
+              <span className="ml-3 flex-1 text-left">Logout</span>
+            )}
           </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
         {/* Header */}
-       <div className="h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between">
-  <div className="flex items-center space-x-4">
-    <Button
-      onClick={() => setIsCollapsed(false)}
-      className="md:hidden"
-      variant="ghost"
-    >
-      <Menu className="h-5 w-5" />
-    </Button>
-    <h2 className="text-lg font-semibold text-gray-900 whitespace-nowrap">
-      MLM Admin Dashboard
-    </h2>
-  </div>
+        <div className="h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between flex-shrink-0">
+          <h2 className="text-xl font-semibold text-gray-900">
+            MLM Admin Dashboard
+          </h2>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex items-center space-x-2 hover:bg-gray-100"
+              >
+                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">A</span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Admin</span>
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => handleProfileAction("profile")}>
+                <User className="mr-2 h-4 w-4" />
+                My Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleProfileAction("settings")}>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleProfileAction("logout")}
+                className="text-red-600"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-  <div className="flex items-center space-x-2">
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex items-center space-x-2 hover:bg-gray-100"
-        >
-          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">A</span>
-          </div>
-          <span className="text-sm font-medium text-gray-700 hidden sm:block">
-            Admin
-          </span>
-          <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => handleProfileAction("profile")}>
-          <User className="mr-2 h-4 w-4" />
-          My Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleProfileAction("settings")}>
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => handleProfileAction("logout")}
-          className="text-red-600"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </div>
-</div>
-
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+        {/* Content */}
+        <div className="flex-1 overflow-auto">{children}</div>
       </div>
     </div>
   );
