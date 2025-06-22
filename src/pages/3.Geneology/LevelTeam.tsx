@@ -241,7 +241,7 @@ const handleSubmit = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen  p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-gray-600 text-white p-4 rounded-t-lg">

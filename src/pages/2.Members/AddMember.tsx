@@ -88,7 +88,7 @@ const AddMember = () => {
   </div>
 
       <div className="p-6">
-        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm border p-4">
           <form onSubmit={handleSubmit} onKeyDown={handleKeyPress}>
             {/* Personal Details Section */}
             <div className="mb-4">
