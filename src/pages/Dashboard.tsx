@@ -18,7 +18,7 @@ const Dashboard = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
-          'http://localhost:5000/admin-referred-members',
+          ' https://user-qn5p.onrender.com/admin-referred-members',
           {
             headers: {
               'Authorization': `Bearer ${token}`
