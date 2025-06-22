@@ -113,12 +113,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       ],
     },
     {
-      id: "master",
-      title: "Master",
-      icon: Settings,
-      children: [],
-    },
-    {
       id: "package",
       title: "Package",
       icon: CreditCard,
@@ -134,24 +128,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       ],
     },
     {
-      id: "top-up",
-      title: "Top Up",
-      icon: Users,
-      children: [{ title: "Member History", path: "/top-up/member-history" }],
-    },
-    {
-      id: "members-kyc",
-      title: "Members KYC",
-      icon: Building2,
-      path: "/members-kyc",
-    },
-    {
-      id: "active-autopool",
-      title: "Active Autopool",
-      icon: TrendingUp,
-      path: "/active-autopool",
-    },
-    {
       id: "income-history",
       title: "Income History",
       icon: Eye,
@@ -161,15 +137,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         { title: "Sponsor Income", path: "/income/sponsor" },
         { title: "Autopool Income", path: "/income/autopool" },
         { title: "Royalty Income", path: "/income/royalty" },
-      ],
-    },
-    {
-      id: "ticket",
-      title: "Ticket",
-      icon: Ticket,
-      children: [
-        { title: "Pending Tickets", path: "/tickets/pending" },
-        { title: "Reply Tickets", path: "/tickets/reply" },
       ],
     },
     {
@@ -192,7 +159,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed z-40 inset-y-0 left-0 transform transition-transform duration-300 w-64 bg-purple-700 text-white flex flex-col md:relative md:translate-x-0 ${
+        className={`fixed z-40 inset-y-0 left-0 transform transition-transform duration-300 w-64 bg-gradient-to-b from-blue-800 via-blue-900 to-blue-950 text-white flex flex-col md:relative md:translate-x-0 ${
           isCollapsed ? "-translate-x-full md:translate-x-0" : "translate-x-0"
         }`}
       >
@@ -200,9 +167,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <div className="h-16 px-4 border-b border-purple-600 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <span className="text-purple-700 font-bold text-sm">MLM</span>
+              <span className="text-purple-700 font-bold text-sm">PM</span>
             </div>
-            <span className="font-semibold text-white">Admin Panel</span>
+            <span className="font-semibold text-white">Prime Next</span>
           </div>
           <Button
             variant="ghost"
@@ -295,61 +262,65 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* Header */}
-        <div className="h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between">
-  <div className="flex items-center space-x-4">
-    <Button
-      onClick={() => setIsCollapsed(false)}
-      className="md:hidden"
-      variant="ghost"
-    >
-      <Menu className="h-5 w-5" />
-    </Button>
-    <h2 className="text-lg font-semibold text-gray-900 whitespace-nowrap">
-      MLM Admin Dashboard
-    </h2>
-  </div>
-
-  <div className="flex items-center space-x-2">
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex items-center space-x-2 hover:bg-gray-100"
-        >
-          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">A</span>
+        <div className="h-16 bg-gradient-to-r from-blue-900 to-blue-950 border-b border-gray-200 px-2 flex items-center justify-between">
+          <div className="flex items-center">
+            <Button
+              onClick={() => setIsCollapsed(false)}
+              className="md:hidden p-3"
+              variant="ghost"
+            >
+              <Menu className="h-7 w-7 text-white" />
+            </Button>
+            <h2 className="text-xl font-bold text-white my-2 ml-2">
+              Prime Next
+            </h2>
           </div>
-          <span className="text-sm font-medium text-gray-700 hidden sm:block">
-            Admin
-          </span>
-          <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => handleProfileAction("profile")}>
-          <User className="mr-2 h-4 w-4" />
-          My Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleProfileAction("settings")}>
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => handleProfileAction("logout")}
-          className="text-red-600"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </div>
-</div>
 
+          <div className="flex items-center space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="group flex items-center space-x-2 hover:bg-gray-100"
+                >
+                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">A</span>
+                  </div>
+                  <span className="text-sm font-medium hidden sm:block text-white group-hover:text-black transition-colors duration-200">
+                    Admin
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-gray-700 hidden sm:block" />
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => handleProfileAction("profile")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  My Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleProfileAction("settings")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleProfileAction("logout")}
+                  className="text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+        <div className="flex-1 overflow-y-auto p-2 bg-gray-300">{children}</div>
       </div>
     </div>
   );

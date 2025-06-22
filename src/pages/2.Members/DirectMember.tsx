@@ -149,67 +149,68 @@ const DirectMember: React.FC = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
-      <div className="bg-white rounded-lg shadow-sm">
-        {/* Header */}
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Direct Member List
-          </h1>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4">
+        <h1 className="text-xl font-semibold text-center">
+          Direct Member List
+        </h1>
+      </div>
 
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-6 border-b border-gray-200">
           {/* Top Controls */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-  {/* Stats */}
-  <div className="flex flex-col sm:flex-row flex-wrap gap-4 text-sm">
-    <div className="flex items-center gap-2">
-      <User className="w-4 h-4 text-blue-600" />
-      <span className="text-gray-600">Total Members:</span>
-      <span className="font-semibold text-blue-600">
-        {totalMembers}
-      </span>
-    </div>
-    <div className="flex items-center gap-2">
-      <UserCheck className="w-4 h-4 text-green-600" />
-      <span className="text-gray-600">Active:</span>
-      <span className="font-semibold text-green-600">
-        {members.filter((m) => m.status).length}
-      </span>
-    </div>
-    <div className="flex items-center gap-2">
-      <DollarSign className="w-4 h-4 text-purple-600" />
-      <span className="text-gray-600">Total Income:</span>
-      <span className="font-semibold text-purple-600">
-        ₹{(members.length * calculateIncome()).toFixed(2)}
-      </span>
-    </div>
-  </div>
+            {/* Stats */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-600" />
+                <span className="text-gray-600">Total Members:</span>
+                <span className="font-semibold text-blue-600">
+                  {totalMembers}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-green-600" />
+                <span className="text-gray-600">Active:</span>
+                <span className="font-semibold text-green-600">
+                  {members.filter((m) => m.status).length}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-purple-600" />
+                <span className="text-gray-600">Total Income:</span>
+                <span className="font-semibold text-purple-600">
+                  ₹{(members.length * calculateIncome()).toFixed(2)}
+                </span>
+              </div>
+            </div>
 
-  {/* Buttons */}
-  <div className="flex flex-wrap justify-start sm:justify-end gap-2">
-    <button
-      onClick={() => handleExport("excel")}
-      className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
-    >
-      <FileText className="w-4 h-4" />
-      Excel
-    </button>
-    <button
-      onClick={() => handleExport("pdf")}
-      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
-    >
-      <Download className="w-4 h-4" />
-      PDF
-    </button>
-    <button
-      onClick={() => setShowFilters(!showFilters)}
-      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-    >
-      <Filter className="w-4 h-4" />
-      {showFilters ? "Hide Filters" : "Show Filters"}
-    </button>
-  </div>
-</div>
-
+            {/* Buttons */}
+            <div className="flex flex-wrap justify-start sm:justify-end gap-2">
+              <button
+                onClick={() => handleExport("excel")}
+                className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Excel
+              </button>
+              <button
+                onClick={() => handleExport("pdf")}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                PDF
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                {showFilters ? "Hide Filters" : "Show Filters"}
+              </button>
+            </div>
+          </div>
 
           {/* Items per page */}
           <div className="flex items-center gap-2 mb-4">

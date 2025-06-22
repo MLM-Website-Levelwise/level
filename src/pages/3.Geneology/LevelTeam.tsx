@@ -241,10 +241,10 @@ const handleSubmit = () => {
   }
 
   return (
-    <div className="min-h-screen  p-6">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-gray-600 text-white p-4 rounded-t-lg">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
           <h1 className="text-xl font-semibold">
             List of Levelwise Team Member(s)
           </h1>
@@ -324,67 +324,66 @@ const handleSubmit = () => {
 
         {/* Results Header */}
         <div className="bg-white px-6 py-4 border-l border-r border-gray-200">
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    {/* Total Member Count */}
-    <div>
-      <span className="text-gray-700 font-medium">
-        Total Team Member ({filteredData.length})
-      </span>
-    </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Total Member Count */}
+            <div>
+              <span className="text-gray-700 font-medium">
+                Total Team Member ({filteredData.length})
+              </span>
+            </div>
 
-    {/* Controls */}
-    <div className="flex flex-wrap gap-2 sm:justify-end">
-      <button
-        onClick={() => handleExport("excel")}
-        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
-        title="Export to Excel"
-      >
-        <FileSpreadsheet size={16} />
-      </button>
+            {/* Controls */}
+            <div className="flex flex-wrap gap-2 sm:justify-end">
+              <button
+                onClick={() => handleExport("excel")}
+                className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
+                title="Export to Excel"
+              >
+                <FileSpreadsheet size={16} />
+              </button>
 
-      <button
-        onClick={() => handleExport("pdf")}
-        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
-        title="Export to PDF"
-      >
-        <FileText size={16} />
-      </button>
+              <button
+                onClick={() => handleExport("pdf")}
+                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
+                title="Export to PDF"
+              >
+                <FileText size={16} />
+              </button>
 
-      <button
-        onClick={() => handleExport("print")}
-        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
-        title="Print"
-      >
-        <Printer size={16} />
-      </button>
+              <button
+                onClick={() => handleExport("print")}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+                title="Print"
+              >
+                <Printer size={16} />
+              </button>
 
-      <select
-        className="px-3 py-1 border border-gray-300 rounded"
-        value={entriesPerPage}
-        onChange={(e) => setEntriesPerPage(parseInt(e.target.value))}
-      >
-        <option value={10}>10</option>
-        <option value={20}>20</option>
-        <option value={50}>50</option>
-        <option value={100}>100</option>
-      </select>
+              <select
+                className="px-3 py-1 border border-gray-300 rounded"
+                value={entriesPerPage}
+                onChange={(e) => setEntriesPerPage(parseInt(e.target.value))}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
 
-      <select
-        className="px-3 py-1 border border-gray-300 rounded"
-        value={exportFormat}
-        onChange={(e) => {
-          setExportFormat(e.target.value);
-          handleSubmit();
-        }}
-      >
-        <option value="All">All</option>
-        <option value="Active">Active</option>
-        <option value="InActive">InActive</option>
-      </select>
-    </div>
-  </div>
-</div>
-
+              <select
+                className="px-3 py-1 border border-gray-300 rounded"
+                value={exportFormat}
+                onChange={(e) => {
+                  setExportFormat(e.target.value);
+                  handleSubmit();
+                }}
+              >
+                <option value="All">All</option>
+                <option value="Active">Active</option>
+                <option value="InActive">InActive</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {/* Table */}
         <div className="bg-white border border-gray-200 rounded-b-lg overflow-hidden">
@@ -393,13 +392,13 @@ const handleSubmit = () => {
               <thead className="bg-gray-600 text-white">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium">
-                    S No
+                    Sl No
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
                     Member Id
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
-                    Member
+                    Member Name
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
                     Sponsor Code
@@ -408,7 +407,7 @@ const handleSubmit = () => {
                     Sponsor Name
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
-                    D O J
+                    DOJ
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
                     Status

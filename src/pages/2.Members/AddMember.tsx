@@ -83,17 +83,19 @@ const AddMember = () => {
   return (
     <div className="flex flex-col w-full">
       {/* Header */}
-      <div className="bg-purple-600 text-white px-6 py-4 w-full rounded-t-md">
-    <h1 className="text-xl font-medium">Membership Form</h1>
-  </div>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 w-full flex items-center justify-center">
+        <h1 className="text-xl font-medium">Membership Form</h1>
+      </div>
 
-      <div className="p-6">
-        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm border p-4">
+      <div className="">
+        <div className="max-w-7xl mx-auto bg-white shadow-sm border p-4">
           <form onSubmit={handleSubmit} onKeyDown={handleKeyPress}>
             {/* Personal Details Section */}
             <div className="mb-4">
-              <h2 className="text-2xl font-medium text-blue-600 mb-3">Personal Details</h2>
-              
+              <h2 className="text-2xl font-medium text-purple-600 mb-3">
+                Personal Details
+              </h2>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Name */}
                 <div>
@@ -120,8 +122,8 @@ const AddMember = () => {
                     name="dateOfJoining"
                     value={formData.dateOfJoining}
                     onChange={handleInputChange}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date().toISOString().split('T')[0]}
+                    min={new Date().toISOString().split("T")[0]}
+                    max={new Date().toISOString().split("T")[0]}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   />
@@ -160,8 +162,10 @@ const AddMember = () => {
 
             {/* Joining Details Section */}
             <div className="mb-6">
-              <h2 className="text-2xl font-medium text-red-600 mb-4">Joining Details</h2>
-              
+              <h2 className="text-2xl font-medium text-red-600 mb-4">
+                Joining Details
+              </h2>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {/* Sponsor Code */}
                 <div>
@@ -234,7 +238,7 @@ const AddMember = () => {
                 disabled={isSubmitting}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit (F2)'}
+                {isSubmitting ? "Submitting..." : "Submit (F2)"}
               </button>
             </div>
           </form>

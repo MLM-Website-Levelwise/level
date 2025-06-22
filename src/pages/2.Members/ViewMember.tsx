@@ -183,63 +183,107 @@ const ViewMember = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className=" min-h-screen">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 w-full text-center">
+        <h1 className="text-xl font-medium text-white">View Members</h1>
+      </div>
+
       <div className="bg-white rounded-lg shadow-sm">
-        {/* Header */}
         <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            View Members
-          </h1>
-
           {/* Top Controls */}
+          {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search members..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap justify-end gap-2">
+              <button
+                onClick={() => handleExport("excel")}
+                className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
+                title="Export to Excel"
+              >
+                <FileSpreadsheet size={16} />
+              </button>
+
+              <button
+                onClick={() => handleExport("pdf")}
+                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
+                title="Export to PDF"
+              >
+                <FileText size={16} />
+              </button>
+
+              <button
+                onClick={() => handleExport("print")}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+                title="Print"
+              >
+                <Printer size={16} />
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Filter
+              </button>
+            </div>
+          </div> */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-  {/* Search */}
-  <div className="relative w-full sm:max-w-xs">
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-    <input
-      type="text"
-      placeholder="Search members..."
-      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
-  </div>
+            {/* Search */}
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search members..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
 
-  {/* Action Buttons */}
-  <div className="flex flex-wrap justify-end gap-2">
-    <button
-        onClick={() => handleExport("excel")}
-        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
-        title="Export to Excel"
-      >
-        <FileSpreadsheet size={16} />
-      </button>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap sm:flex-nowrap justify-start sm:justify-end gap-2">
+              <button
+                onClick={() => handleExport("excel")}
+                className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
+                title="Export to Excel"
+              >
+                <FileSpreadsheet size={16} />
+              </button>
 
-      <button
-        onClick={() => handleExport("pdf")}
-        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
-        title="Export to PDF"
-      >
-        <FileText size={16} />
-      </button>
+              <button
+                onClick={() => handleExport("pdf")}
+                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded"
+                title="Export to PDF"
+              >
+                <FileText size={16} />
+              </button>
 
-      <button
-        onClick={() => handleExport("print")}
-        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
-        title="Print"
-      >
-        <Printer size={16} />
-      </button>
-    <button
-      onClick={() => setShowFilters(!showFilters)}
-      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-    >
-      <Filter className="w-4 h-4" />
-      Filter
-    </button>
-  </div>
-</div>
+              <button
+                onClick={() => handleExport("print")}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
+                title="Print"
+              >
+                <Printer size={16} />
+              </button>
 
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Filter
+              </button>
+            </div>
+          </div>
 
           {/* Items per page */}
           <div className="flex items-center gap-2">
@@ -406,7 +450,7 @@ const ViewMember = () => {
                   className="border-b border-gray-200 hover:bg-gray-50"
                 >
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {members.findIndex(m => m.id === member.id) + 1}
+                    {members.findIndex((m) => m.id === member.id) + 1}
                   </td>
                   <td className="px-4 py-3 text-sm text-blue-600 font-medium">
                     {member.member_id}
@@ -438,7 +482,9 @@ const ViewMember = () => {
                     {member.password}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {new Date(member.date_of_joining).toLocaleDateString("en-GB")}
+                    {new Date(member.date_of_joining).toLocaleDateString(
+                      "en-GB"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <span
@@ -454,14 +500,18 @@ const ViewMember = () => {
                   <td className="px-4 py-3 text-sm">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/members/edit-member/${member.id}`)}
+                        onClick={() =>
+                          navigate(`/members/edit-member/${member.id}`)
+                        }
                         className="text-blue-600 hover:text-blue-800 p-1 rounded"
                         title="Edit"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleUpdateStatus(member.id, member.active_status)}
+                        onClick={() =>
+                          handleUpdateStatus(member.id, member.active_status)
+                        }
                         className={`p-1 rounded ${
                           member.active_status
                             ? "text-red-600 hover:text-red-800"
