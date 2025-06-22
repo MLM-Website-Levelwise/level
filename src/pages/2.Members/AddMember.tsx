@@ -81,11 +81,11 @@ const AddMember = () => {
   };
 
   return (
-    <div className="min-h-screen flex w-full bg-gray-50">
+    <div className="flex flex-col w-full">
       {/* Header */}
-      <div className="bg-purple-600 text-white px-6 py-4">
-        <h1 className="text-xl font-medium">Membership Form</h1>
-      </div>
+      <div className="bg-purple-600 text-white px-6 py-4 w-full rounded-t-md">
+    <h1 className="text-xl font-medium">Membership Form</h1>
+  </div>
 
       <div className="p-6">
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-4">
