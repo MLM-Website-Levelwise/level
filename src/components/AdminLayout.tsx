@@ -164,7 +164,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         }`}
       >
         {/* Sidebar Header */}
-        <div className="h-16 px-4 border-b border-purple-600 flex items-center justify-between">
+        <div className="h-16 px-4 border-b border-white-600 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
               <span className="text-purple-700 font-bold text-sm">PM</span>
@@ -247,7 +247,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </ScrollArea>
 
         {/* Logout Button */}
-        <div className="p-3 border-t border-purple-600">
+        <div className="p-3 border-t border-white-600">
           <Button
             variant="ghost"
             className="w-full justify-start hover:bg-red-600 hover:text-white text-white text-base h-11 px-3"
