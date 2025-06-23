@@ -167,7 +167,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <div className="h-16 px-4 border-b border-white-600 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <span className="text-purple-700 font-bold text-sm">PM</span>
+              <span className="text-purple-700 font-bold text-sm">PN</span>
             </div>
             <span className="font-semibold text-white">Prime Next</span>
           </div>

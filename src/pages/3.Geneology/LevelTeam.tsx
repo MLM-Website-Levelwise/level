@@ -308,6 +308,10 @@ const handleSubmit = () => {
                 <option value="4">4</option>
                 <option value="5">5</option>
                 <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
               </select>
             </div>
 
@@ -395,6 +399,9 @@ const handleSubmit = () => {
                     Sl No
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
+                    DOJ
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">
                     Member Id
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium">
@@ -406,9 +413,7 @@ const handleSubmit = () => {
                   <th className="px-4 py-3 text-left text-sm font-medium">
                     Sponsor Name
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">
-                    DOJ
-                  </th>
+                  
                   <th className="px-4 py-3 text-left text-sm font-medium">
                     Status
                   </th>
@@ -424,6 +429,9 @@ const handleSubmit = () => {
                       {index + 1}.
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
+                      {new Date(member.date_of_joining).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
                       {member.member_id}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
@@ -435,9 +443,7 @@ const handleSubmit = () => {
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {member.sponsor_name}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {new Date(member.date_of_joining).toLocaleDateString()}
-                    </td>
+                    
                     <td className="px-4 py-3 text-sm">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${

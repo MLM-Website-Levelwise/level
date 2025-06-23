@@ -177,13 +177,13 @@ const DirectMember: React.FC = () => {
                   {members.filter((m) => m.status).length}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-purple-600" />
                 <span className="text-gray-600">Total Income:</span>
                 <span className="font-semibold text-purple-600">
                   ₹{(members.length * calculateIncome()).toFixed(2)}
                 </span>
-              </div>
+              </div> */}
             </div>
 
             {/* Buttons */}
@@ -325,10 +325,7 @@ const DirectMember: React.FC = () => {
                   Sl No.
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium">
-                  Sponsor ID
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  Sponsor Name
+                  Date of Joining
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Member ID
@@ -336,12 +333,17 @@ const DirectMember: React.FC = () => {
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Member Name
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium">
-                  Position
+                <th className="px-4 py-3 text-left text-sm font-medium">
+                  Sponsor ID
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium">
-                  Date of Joining
+                  Sponsor Name
                 </th>
+                
+                {/* <th className="px-4 py-3 text-center text-sm font-medium">
+                  Position
+                </th> */}
+                
                 <th className="px-4 py-3 text-center text-sm font-medium">
                   Status
                 </th>
@@ -369,11 +371,10 @@ const DirectMember: React.FC = () => {
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="px-4 py-3 text-sm text-blue-600 font-medium">
-                      {member.sponsor_id}
-                    </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
-                      {member.sponsor_name}
+                      {new Date(member.date_of_joining).toLocaleDateString(
+                        "en-GB"
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-blue-600 font-medium">
                       {member.member_id}
@@ -381,7 +382,14 @@ const DirectMember: React.FC = () => {
                     <td className="px-4 py-3 text-sm text-gray-900 font-medium">
                       {member.name}
                     </td>
-                    <td className="px-4 py-3 text-sm text-center">
+                    <td className="px-4 py-3 text-sm text-blue-600 font-medium">
+                      {member.sponsor_id}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {member.sponsor_name}
+                    </td>
+                    
+                    {/* <td className="px-4 py-3 text-sm text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
                           member.position === "Left"
@@ -391,12 +399,8 @@ const DirectMember: React.FC = () => {
                       >
                         {member.position}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {new Date(member.date_of_joining).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </td>
+                    </td> */}
+                    
                     <td className="px-4 py-3 text-sm text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${

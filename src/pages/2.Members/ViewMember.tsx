@@ -333,7 +333,7 @@ const ViewMember = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Package
                   </label>
@@ -347,7 +347,7 @@ const ViewMember = () => {
                     <option value="">All Packages</option>
                     <option value="Elite">Elite</option>
                   </select>
-                </div>
+                </div> */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Member Code
@@ -413,6 +413,7 @@ const ViewMember = () => {
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Sl No.
                 </th>
+                <th className="px-4 py-3 text-left text-sm font-medium">DOJ</th>
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Member Id
                 </th>
@@ -434,7 +435,7 @@ const ViewMember = () => {
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Password
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">DOJ</th>
+                
                 <th className="px-4 py-3 text-left text-sm font-medium">
                   Active Status
                 </th>
@@ -451,6 +452,11 @@ const ViewMember = () => {
                 >
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {members.findIndex((m) => m.id === member.id) + 1}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    {new Date(member.date_of_joining).toLocaleDateString(
+                      "en-GB"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-blue-600 font-medium">
                     {member.member_id}
@@ -481,11 +487,7 @@ const ViewMember = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {member.password}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">
-                    {new Date(member.date_of_joining).toLocaleDateString(
-                      "en-GB"
-                    )}
-                  </td>
+                  
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
