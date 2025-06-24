@@ -11,7 +11,7 @@ import {
   Ban,
   UserCheck,FileSpreadsheet, Printer
 } from "lucide-react";
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const ViewMember = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,7 +37,7 @@ const ViewMember = () => {
     const fetchMembers = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/members', {
+        const response = await fetch(`${API_BASE_URL}/members`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -136,7 +136,7 @@ const ViewMember = () => {
   const handleUpdateStatus = async (memberId, currentStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/members/${memberId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/members/${memberId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

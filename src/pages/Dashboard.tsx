@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Users, TrendingUp, Crown, DollarSign, UserCheck } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [directMembersIncome, setDirectMembersIncome] = useState<number | null>(
@@ -25,7 +27,7 @@ const Dashboard = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          "http://localhost:5000/admin-referred-members",
+          `${API_BASE_URL}/admin-referred-members`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

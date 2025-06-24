@@ -18,6 +18,8 @@ interface Transaction {
   status: string;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const FundHistory = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ const FundHistory = () => {
       }
 
       const response = await axios.get(
-        "http://localhost:5000/admin-wallet-transactions",
+        `${API_BASE_URL}/admin-wallet-transactions`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -185,7 +187,7 @@ const FundHistory = () => {
       }
 
       await axios.put(
-        "http://localhost:5000/update-wallet-transaction",
+        `${API_BASE_URL}/update-wallet-transaction`,
         {
           transactionId: editModal.transaction.id,
           newAmount,

@@ -28,7 +28,7 @@ interface ApiResponse {
   members: Member[];
   total: number;
 }
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const DirectMember: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -62,7 +62,7 @@ const DirectMember: React.FC = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:5000/direct-members?page=${currentPage}&limit=${itemsPerPage}`,
+          `${API_BASE_URL}/direct-members?page=${currentPage}&limit=${itemsPerPage}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`

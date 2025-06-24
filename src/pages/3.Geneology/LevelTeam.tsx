@@ -26,7 +26,7 @@ const LevelTeam = () => {
   });
   const [entriesPerPage, setEntriesPerPage] = useState(20);
   const [exportFormat, setExportFormat] = useState("All");
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // Fetch members and calculate levels
   useEffect(() => {
     const fetchMembers = async () => {
@@ -34,7 +34,7 @@ const LevelTeam = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         const response = await fetch(
-          'http://localhost:5000/members',
+          `${API_BASE_URL}/members`,
           {
             headers: {
               'Authorization': `Bearer ${token}`

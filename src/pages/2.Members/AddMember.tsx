@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader, AlertCircle } from "lucide-react";
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const AddMember = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -31,7 +33,7 @@ const AddMember = () => {
         return "";
       }
 
-      const response = await axios.get(`http://localhost:5000/members?member_id=${memberId}`, {
+      const response = await axios.get(`${API_BASE_URL}/members?member_id=${memberId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -84,7 +86,7 @@ const AddMember = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5000/members', {
+      const response = await fetch(`${API_BASE_URL}/members`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

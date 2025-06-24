@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 interface FormData {
   transferType: "main" | "retopup";
   memberId: string;
@@ -62,7 +62,7 @@ const WalletTransfer: React.FC = () => {
         return "";
       }
 
-      const response = await axios.get(`http://localhost:5000/members?member_id=${memberId}`, {
+      const response = await axios.get(`${API_BASE_URL}/members?member_id=${memberId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -156,7 +156,7 @@ const WalletTransfer: React.FC = () => {
 
       // Send transfer request to backend
       const response = await axios.post(
-        "http://localhost:5000/wallet-transfer",
+        `${API_BASE_URL}/wallet-transfer`,
         {
           member_id: formData.memberId,
           transfer_type: formData.transferType === "main" ? "Main Wallet" : "Re Top-up Wallet",

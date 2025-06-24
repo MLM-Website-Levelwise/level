@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { User, Mail, Phone, MapPin } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const EditMember = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ const EditMember = () => {
     const fetchMember = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/members/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/members/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -75,7 +77,7 @@ const EditMember = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/members/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/members/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
