@@ -16,6 +16,7 @@ interface Transaction {
   date: string;
   transferType: string;
   status: string;
+  original_amount?: number;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -150,67 +151,84 @@ const FundHistory = () => {
 
   // Handle adjustment change
   const handleAdjustmentChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = e.target;
-  setEditModal({
-    ...editModal,
-    [name]: value,
-  });
-};
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditModal({
+      ...editModal,
+      [name]: value,
+    });
+  };
 
   // Calculate new amount based on adjustment
   const calculateNewAmount = () => {
     if (!editModal.transaction) return 0;
     
     const adjustmentValue = parseFloat(editModal.adjustment) || 0;
+    const currentAmount = editModal.transaction.amount;
+    
     return editModal.adjustmentType === "add"
-      ? editModal.transaction.amount + adjustmentValue
-      : editModal.transaction.amount - adjustmentValue;
+      ? currentAmount + adjustmentValue
+      : currentAmount - adjustmentValue;
+  };
+
+  // Calculate new original amount after adjustment
+  const calculateNewOriginalAmount = () => {
+    if (!editModal.transaction) return 0;
+    
+    const adjustmentValue = parseFloat(editModal.adjustment) || 0;
+    const originalAmount = editModal.transaction.original_amount || editModal.transaction.amount;
+    
+    return editModal.adjustmentType === "add"
+      ? originalAmount + adjustmentValue
+      : originalAmount - adjustmentValue;
   };
 
   // Submit adjustment
   const submitAdjustment = async () => {
-    if (!editModal.transaction) return;
+  if (!editModal.transaction) return;
 
-    try {
-      setEditModal(prev => ({ ...prev, isSubmitting: true }));
-      
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const newAmount = calculateNewAmount();
-      if (newAmount < 0) {
-        throw new Error("Amount cannot be negative");
-      }
-
-      await axios.put(
-        `${API_BASE_URL}/update-wallet-transaction`,
-        {
-          transactionId: editModal.transaction.id,
-          newAmount,
-          adjustmentType: editModal.adjustmentType,
-          notes: editModal.notes || `Amount ${editModal.adjustmentType}ed by admin`,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      toast.success("Transaction updated successfully");
-      fetchTransactions(); // Refresh the list
-      closeEditModal();
-    } catch (error: any) {
-      console.error("Error updating transaction:", error);
-      toast.error(error.message || "Failed to update transaction");
-    } finally {
-      setEditModal(prev => ({ ...prev, isSubmitting: false }));
+  try {
+    setEditModal(prev => ({ ...prev, isSubmitting: true }));
+    
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
     }
-  };
+
+    const adjustmentValue = parseFloat(editModal.adjustment) || 0;
+    const newAmount = calculateNewAmount();
+    
+    if (newAmount < 0) {
+      throw new Error("Amount cannot be negative");
+    }
+
+    await axios.put(
+      `${API_BASE_URL}/update-wallet-transaction`,
+      {
+        transactionId: editModal.transaction.id,
+        newAmount,
+        newOriginalAmount: calculateNewOriginalAmount(), // Send calculated original amount
+        adjustmentType: editModal.adjustmentType,
+        notes: editModal.notes || `Amount ${editModal.adjustmentType}ed by admin`,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    toast.success("Transaction updated successfully");
+    fetchTransactions();
+    closeEditModal();
+  } catch (error: any) {
+    console.error("Error updating transaction:", error);
+    toast.error(error.message || "Failed to update transaction");
+  } finally {
+    setEditModal(prev => ({ ...prev, isSubmitting: false }));
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
@@ -382,7 +400,10 @@ const FundHistory = () => {
                         {transaction.memberName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${transaction.amount.toFixed(2)}
+                        <div className="flex flex-col">
+                          ${transaction.original_amount?.toFixed(2) || transaction.amount.toFixed(2)}
+                          {/* <span>Current: ${transaction.amount.toFixed(2)}</span> */}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {transaction.transferType}
@@ -526,10 +547,15 @@ const FundHistory = () => {
                       Member: {editModal.transaction.memberName} (
                       {editModal.transaction.memberId})
                     </p>
-                    <p className="text-sm text-gray-500">
-                      Original Amount: ${editModal.transaction.amount.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-gray-500">
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-gray-500">
+                        Original Amount: ${editModal.transaction.original_amount?.toFixed(2) || editModal.transaction.amount.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Current Amount: ${editModal.transaction.amount.toFixed(2)}
+                      </p>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
                       Date: {formatDate(editModal.transaction.date)}
                     </p>
                   </div>
@@ -575,12 +601,18 @@ const FundHistory = () => {
                       rows={3}
                     />
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      New Amount
-                    </label>
-                    <div className="px-3 py-2 bg-gray-100 rounded-md font-medium">
-                      ${calculateNewAmount().toFixed(2)}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-700">New Current Amount:</span>
+                      <span className="text-sm font-medium">
+                        ${calculateNewAmount().toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-700">New Original Amount:</span>
+                      <span className="text-sm font-medium">
+                        ${calculateNewOriginalAmount().toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
