@@ -25,7 +25,7 @@ const EditMember = () => {
     const fetchMember = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://user-qn5p.onrender.com/members/${id}`, {
+        const response = await fetch(`http://localhost:5000/members/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -75,7 +75,7 @@ const EditMember = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://user-qn5p.onrender.com/members/${id}`, {
+      const response = await fetch(`http://localhost:5000/members/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

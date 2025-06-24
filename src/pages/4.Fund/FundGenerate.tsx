@@ -62,7 +62,7 @@ const WalletTransfer: React.FC = () => {
         return "";
       }
 
-      const response = await axios.get(`https://user-qn5p.onrender.com/members?member_id=${memberId}`, {
+      const response = await axios.get(`http://localhost:5000/members?member_id=${memberId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -156,7 +156,7 @@ const WalletTransfer: React.FC = () => {
 
       // Send transfer request to backend
       const response = await axios.post(
-        "https://user-qn5p.onrender.com/wallet-transfer",
+        "http://localhost:5000/wallet-transfer",
         {
           member_id: formData.memberId,
           transfer_type: formData.transferType === "main" ? "Main Wallet" : "Re Top-up Wallet",

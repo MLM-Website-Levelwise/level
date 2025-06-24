@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
+import { Loader, AlertCircle } from "lucide-react";
+import axios from 'axios';
 
 const AddMember = () => {
   const navigate = useNavigate();
@@ -17,13 +19,59 @@ const AddMember = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isFetchingSponsor, setIsFetchingSponsor] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Fetch sponsor name from backend
+  const fetchSponsorName = async (memberId: string): Promise<string> => {
+    setIsFetchingSponsor(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return "";
+      }
+
+      const response = await axios.get(`http://localhost:5000/members?member_id=${memberId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data.members && response.data.members.length > 0) {
+        return response.data.members[0].name;
+      }
+      return "";
+    } catch (error) {
+      console.error("Error fetching sponsor:", error);
+      return "";
+    } finally {
+      setIsFetchingSponsor(false);
+    }
+  };
+
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // Fetch sponsor name when sponsor code changes and has at least 4 characters
+    if (name === "sponsorCode" && value.length >= 4) {
+      try {
+        const sponsorName = await fetchSponsorName(value);
+        setFormData(prev => ({
+          ...prev,
+          sponsorName
+        }));
+      } catch (error) {
+        setFormData(prev => ({
+          ...prev,
+          sponsorName: ""
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +84,7 @@ const AddMember = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://user-qn5p.onrender.com/members', {
+      const response = await fetch('http://localhost:5000/members', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,14 +200,22 @@ const AddMember = () => {
                   <label className="block text-gray-700 text-sm mb-2">
                     Sponsor Name <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="sponsorName"
-                    value={formData.sponsorName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="sponsorName"
+                      value={formData.sponsorName}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50"
+                      required
+                      readOnly
+                    />
+                    {isFetchingSponsor && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                        <Loader className="w-4 h-4 animate-spin text-blue-600" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
