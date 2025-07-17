@@ -1,802 +1,496 @@
-import React, { useState } from "react";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Save,
-  X,
-  DollarSign,
-  Users,
-  TrendingUp,
-  Award,
-  Package,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, Edit2, X, Loader2 } from "lucide-react";
+import axios from 'axios';
 
-const PackageManager = () => {
-  const [activeTab, setActiveTab] = useState("view");
-  const [packages, setPackages] = useState([
-    {
-      id: 1,
-      name: "Starter Package",
-      price: 99,
-      benefits: ["Basic Training", "Starter Kit", "Email Support"],
-      directBonus: 5,
-      levelIncome: [20, 10, 10, 5, 5, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2],
-      repurchaseRequirement: [
-        1,
-        2,
-        3,
-        4,
-        5,
-        "After 5th level 1 direct 2 level opening",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ],
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Premium Package",
-      price: 299,
-      benefits: [
-        "Advanced Training",
-        "Premium Kit",
-        "Phone Support",
-        "Marketing Materials",
-      ],
-      directBonus: 5,
-      levelIncome: [20, 10, 10, 5, 5, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2],
-      repurchaseRequirement: [
-        1,
-        2,
-        3,
-        4,
-        5,
-        "After 5th level 1 direct 2 level opening",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ],
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Elite Package",
-      price: 599,
-      benefits: [
-        "Expert Training",
-        "Elite Kit",
-        "24/7 Support",
-        "Marketing Materials",
-        "Personal Mentor",
-      ],
-      directBonus: 5,
-      levelIncome: [20, 10, 10, 5, 5, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2],
-      repurchaseRequirement: [
-        1,
-        2,
-        3,
-        4,
-        5,
-        "After 5th level 1 direct 2 level opening",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ],
-      status: "active",
-    },
-  ]);
+interface Package {
+  id: number;
+  plan_name: string;
+  name: string;
+  amount: number;
+  direct_bonus: number;
+  matching_value: number;
+  growth_units: number;
+  level_value: number;
+}
 
-  const [editingPackage, setEditingPackage] = useState(null);
-  const [newPackage, setNewPackage] = useState({
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const PackageManager: React.FC = () => {
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [formData, setFormData] = useState({
+    plan_name: "",
     name: "",
-    price: "",
-    benefits: [""],
-    directBonus: 5,
-    levelIncome: [20, 10, 10, 5, 5, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2],
-    repurchaseRequirement: [
-      1,
-      2,
-      3,
-      4,
-      5,
-      "After 5th level 1 direct 2 level opening",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ],
+    amount: "",
+    directBonus: "",
+    matchingValue: "",
+    growthUnits: "",
+    levelValue: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
-  const levelLabels = [
-    "LEVEL 1",
-    "LEVEL 2",
-    "LEVEL 3",
-    "LEVEL 4",
-    "LEVEL 5",
-    "LEVEL 6",
-    "LEVEL 7",
-    "LEVEL 8",
-    "LEVEL 9",
-    "LEVEL 10",
-    "LEVEL 11",
-    "LEVEL 12",
-    "LEVEL 13",
-    "LEVEL 14",
-    "LEVEL 15",
-  ];
+  useEffect(() => {
+    fetchPackages();
+  }, []);
 
-  const handleAddBenefit = (isEditing = false) => {
-    if (isEditing && editingPackage) {
-      setEditingPackage({
-        ...editingPackage,
-        benefits: [...editingPackage.benefits, ""],
-      });
-    } else {
-      setNewPackage({
-        ...newPackage,
-        benefits: [...newPackage.benefits, ""],
-      });
+  const getAuthHeaders = () => {
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    };
+  };
+
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${API_BASE_URL}/packages`, getAuthHeaders());
+      setPackages(response.data);
+    } catch (error) {
+      console.error('Error fetching packages:', error);
+      setError('Failed to fetch packages. Please try again.');
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        // Handle unauthorized access
+        localStorage.removeItem('token');
+        setToken(null);
+        alert('Session expired. Please login again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBenefitChange = (index, value, isEditing = false) => {
-    if (isEditing && editingPackage) {
-      const updatedBenefits = [...editingPackage.benefits];
-      updatedBenefits[index] = value;
-      setEditingPackage({
-        ...editingPackage,
-        benefits: updatedBenefits,
-      });
-    } else {
-      const updatedBenefits = [...newPackage.benefits];
-      updatedBenefits[index] = value;
-      setNewPackage({
-        ...newPackage,
-        benefits: updatedBenefits,
-      });
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleRemoveBenefit = (index, isEditing = false) => {
-    if (isEditing && editingPackage) {
-      const updatedBenefits = editingPackage.benefits.filter(
-        (_, i) => i !== index
-      );
-      setEditingPackage({
-        ...editingPackage,
-        benefits: updatedBenefits,
-      });
-    } else {
-      const updatedBenefits = newPackage.benefits.filter((_, i) => i !== index);
-      setNewPackage({
-        ...newPackage,
-        benefits: updatedBenefits,
-      });
+  const validateForm = () => {
+    const errors = [];
+    if (!formData.plan_name.trim()) errors.push('Plan Name is required');
+    if (!formData.name.trim()) errors.push('Package Name is required');
+    if (!formData.amount) errors.push('Amount is required');
+    if (!formData.directBonus) errors.push('Direct Bonus is required');
+    if (!formData.matchingValue) errors.push('Matching Value is required');
+    if (!formData.growthUnits) errors.push('Growth Units is required');
+    if (!formData.levelValue) errors.push('Level Value is required');
+
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      return false;
     }
+    return true;
   };
 
-  const handleLevelIncomeChange = (index, value, isEditing = false) => {
-    if (isEditing && editingPackage) {
-      const updatedLevels = [...editingPackage.levelIncome];
-      updatedLevels[index] = parseFloat(value) || 0;
-      setEditingPackage({
-        ...editingPackage,
-        levelIncome: updatedLevels,
-      });
+  const handleSubmit = async () => {
+  if (!validateForm()) return;
+
+  try {
+    setIsSubmitting(true);
+    setError(null);
+
+    // Prepare payload with trimmed strings and proper number conversion
+    const payload = {
+      plan_name: formData.plan_name.trim(),
+      name: formData.name.trim(),
+      amount: Number(formData.amount),
+      direct_bonus: Number(formData.directBonus),
+      matching_value: Number(formData.matchingValue),
+      growth_units: Number(formData.growthUnits),
+      level_value: Number(formData.levelValue)
+    };
+
+    // Debug the payload before sending
+    console.log('Sending payload:', payload);
+
+    const response = editingPackage
+      ? await axios.put(`${API_BASE_URL}/packages/${editingPackage.id}`, payload, getAuthHeaders())
+      : await axios.post(`${API_BASE_URL}/packages`, payload, getAuthHeaders());
+
+    console.log('Server response:', response.data);
+    
+    await fetchPackages();
+    handleCancel();
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        console.error('Error response:', error.response.data);
+        
+        // Try to get detailed error message from server
+        const serverError = error.response.data?.error || 
+                          error.response.data?.message || 
+                          JSON.stringify(error.response.data);
+        
+        setError(`Server error: ${serverError}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+        setError('No response from server. Check your connection.');
+      } else {
+        // Something happened in setting up the request
+        console.error('Request setup error:', error.message);
+        setError('Request error: ' + error.message);
+      }
     } else {
-      const updatedLevels = [...newPackage.levelIncome];
-      updatedLevels[index] = parseFloat(value) || 0;
-      setNewPackage({
-        ...newPackage,
-        levelIncome: updatedLevels,
-      });
+      // Non-Axios error
+      console.error('Unexpected error:', error);
+      setError('An unexpected error occurred');
     }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  const handleEdit = (pkg: Package) => {
+    setEditingPackage(pkg);
+    setFormData({
+      plan_name: pkg.plan_name,
+      name: pkg.name,
+      amount: pkg.amount.toString(),
+      directBonus: pkg.direct_bonus.toString(),
+      matchingValue: pkg.matching_value.toString(),
+      growthUnits: pkg.growth_units.toString(),
+      levelValue: pkg.level_value.toString(),
+    });
+    setShowAddForm(true);
   };
 
-  const handleRepurchaseChange = (index, value, isEditing = false) => {
-    if (isEditing && editingPackage) {
-      const updatedRequirements = [...editingPackage.repurchaseRequirement];
-      updatedRequirements[index] = value;
-      setEditingPackage({
-        ...editingPackage,
-        repurchaseRequirement: updatedRequirements,
-      });
-    } else {
-      const updatedRequirements = [...newPackage.repurchaseRequirement];
-      updatedRequirements[index] = value;
-      setNewPackage({
-        ...newPackage,
-        repurchaseRequirement: updatedRequirements,
-      });
-    }
-  };
-
-  const handleSavePackage = () => {
-    if (!newPackage.name || !newPackage.price) {
-      alert("Please fill in all required fields");
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this package?')) {
       return;
     }
 
-    const packageToSave = {
-      id: Date.now(),
-      name: newPackage.name,
-      price: parseFloat(newPackage.price),
-      benefits: newPackage.benefits.filter((b) => b.trim() !== ""),
-      directBonus: newPackage.directBonus,
-      levelIncome: [...newPackage.levelIncome],
-      repurchaseRequirement: [...newPackage.repurchaseRequirement],
-      status: "active",
-    };
-
-    setPackages([...packages, packageToSave]);
-    setNewPackage({
-      name: "",
-      price: "",
-      benefits: [""],
-      directBonus: 5,
-      levelIncome: [20, 10, 10, 5, 5, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2],
-      repurchaseRequirement: [
-        1,
-        2,
-        3,
-        4,
-        5,
-        "After 5th level 1 direct 2 level opening",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ],
-    });
-    setActiveTab("view");
-  };
-
-  const handleEditPackage = (pkg) => {
-    setEditingPackage({
-      ...pkg,
-      levelIncome: [...pkg.levelIncome],
-      repurchaseRequirement: [...pkg.repurchaseRequirement],
-    });
-  };
-
-  const handleUpdatePackage = () => {
-    const updatedPackages = packages.map((pkg) =>
-      pkg.id === editingPackage.id ? editingPackage : pkg
-    );
-    setPackages(updatedPackages);
-    setEditingPackage(null);
-  };
-
-  const handleDeletePackage = (id) => {
-    if (window.confirm("Are you sure you want to delete this package?")) {
-      setPackages(packages.filter((pkg) => pkg.id !== id));
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/packages/${id}`,
+        getAuthHeaders()
+      );
+      await fetchPackages();
+    } catch (error) {
+      console.error('Error deleting package:', error);
+      setError('Failed to delete package. Please try again.');
     }
   };
 
-  const handleToggleStatus = (id) => {
-    const updatedPackages = packages.map((pkg) =>
-      pkg.id === id
-        ? { ...pkg, status: pkg.status === "active" ? "inactive" : "active" }
-        : pkg
-    );
-    setPackages(updatedPackages);
+  const handleCancel = () => {
+    setShowAddForm(false);
+    setEditingPackage(null);
+    setFormData({
+      plan_name: "",
+      name: "",
+      amount: "",
+      directBonus: "",
+      matchingValue: "",
+      growthUnits: "",
+      levelValue: "",
+    });
+    setError(null);
   };
+
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Unauthorized Access</h2>
+          <p className="text-gray-600 mb-6">Please login to access the package management system.</p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && packages.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-lg text-gray-700">Loading packages...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Package Management System
-          </h1>
-          <p className="text-gray-600">
-            Manage MLM packages and 15-level commission structure
-          </p>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 mb-6 bg-white rounded-lg p-1 shadow-sm border">
-          <button
-            onClick={() => setActiveTab("view")}
-            className={`flex items-center px-6 py-3 rounded-md font-medium transition-all ${
-              activeTab === "view"
-                ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-            }`}
-          >
-            <Eye className="w-5 h-5 mr-2" />
-            View All Packages
-          </button>
-          <button
-            onClick={() => setActiveTab("add")}
-            className={`flex items-center px-6 py-3 rounded-md font-medium transition-all ${
-              activeTab === "add"
-                ? "bg-blue-600 text-white shadow-md"
-                : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-            }`}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add New Package
-          </button>
-        </div>
-
-        {/* View All Packages Tab */}
-        {activeTab === "view" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {packages.map((pkg) => (
-                <div
-                  key={pkg.id}
-                  className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden"
-                >
-                  {editingPackage && editingPackage.id === pkg.id ? (
-                    /* Edit Mode */
-                    <div className="p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Edit Package
-                        </h3>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={handleUpdatePackage}
-                            className="flex items-center px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
-                          >
-                            <Save className="w-4 h-4 mr-1" />
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingPackage(null)}
-                            className="flex items-center px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Package Name
-                          </label>
-                          <input
-                            type="text"
-                            value={editingPackage.name}
-                            onChange={(e) =>
-                              setEditingPackage({
-                                ...editingPackage,
-                                name: e.target.value,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Price ($)
-                          </label>
-                          <input
-                            type="number"
-                            value={editingPackage.price}
-                            onChange={(e) =>
-                              setEditingPackage({
-                                ...editingPackage,
-                                price: parseFloat(e.target.value) || 0,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Direct Bonus (%)
-                          </label>
-                          <input
-                            type="number"
-                            value={editingPackage.directBonus}
-                            onChange={(e) =>
-                              setEditingPackage({
-                                ...editingPackage,
-                                directBonus: parseFloat(e.target.value) || 0,
-                              })
-                            }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Benefits
-                          </label>
-                          {editingPackage.benefits.map((benefit, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center space-x-2 mb-2"
-                            >
-                              <input
-                                type="text"
-                                value={benefit}
-                                onChange={(e) =>
-                                  handleBenefitChange(
-                                    index,
-                                    e.target.value,
-                                    true
-                                  )
-                                }
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                placeholder="Enter benefit"
-                              />
-                              <button
-                                onClick={() => handleRemoveBenefit(index, true)}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-md"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))}
-                          <button
-                            onClick={() => handleAddBenefit(true)}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                          >
-                            + Add Benefit
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* View Mode */
-                    <div>
-                      {/* Package Header */}
-                      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-semibold mb-1">
-                              {pkg.name}
-                            </h3>
-                            <p className="text-2xl font-bold">${pkg.price}</p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                pkg.status === "active"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {pkg.status}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Package Content */}
-                      <div className="p-4">
-                        {/* Benefits */}
-                        <div className="mb-4">
-                          <h4 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
-                            <Award className="w-4 h-4 mr-2" />
-                            Benefits
-                          </h4>
-                          <ul className="space-y-1">
-                            {pkg.benefits.slice(0, 3).map((benefit, index) => (
-                              <li
-                                key={index}
-                                className="flex items-center text-sm text-gray-600"
-                              >
-                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>
-                                {benefit}
-                              </li>
-                            ))}
-                            {pkg.benefits.length > 3 && (
-                              <li className="text-sm text-gray-500">
-                                +{pkg.benefits.length - 3} more benefits
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-
-                        {/* Commission Info */}
-                        <div className="mb-4">
-                          <h4 className="font-semibold text-gray-800 mb-2 flex items-center text-sm">
-                            <TrendingUp className="w-4 h-4 mr-2" />
-                            Commission Structure
-                          </h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">
-                                Direct Bonus:
-                              </span>
-                              <span className="font-medium text-green-600">
-                                {pkg.directBonus}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Level 1-2:</span>
-                              <span className="font-medium">
-                                {pkg.levelIncome[0]}%, {pkg.levelIncome[1]}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Level 3-5:</span>
-                              <span className="font-medium">
-                                {pkg.levelIncome[2]}%, {pkg.levelIncome[3]}%,{" "}
-                                {pkg.levelIncome[4]}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Level 6-15:</span>
-                              <span className="font-medium">3%-2% range</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex justify-between items-center pt-4 border-t">
-                          <button
-                            onClick={() => handleEditPackage(pkg)}
-                            className="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors text-sm"
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </button>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleToggleStatus(pkg.id)}
-                              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                pkg.status === "active"
-                                  ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
-                                  : "bg-green-50 text-green-600 hover:bg-green-100"
-                              }`}
-                            >
-                              {pkg.status === "active"
-                                ? "Deactivate"
-                                : "Activate"}
-                            </button>
-                            <button
-                              onClick={() => handleDeletePackage(pkg.id)}
-                              className="px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors text-sm"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Package Management
+            </h1>
+            {!showAddForm && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+              >
+                <Plus size={20} />
+                Add Package
+              </button>
+            )}
           </div>
-        )}
 
-        {/* Add New Package Tab */}
-        {activeTab === "add" && (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200">
-            <div className="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">
-                    Add New Package
-                  </h3>
-                  <p className="text-green-100">
-                    Create a new MLM package with 15-level commission structure
-                  </p>
-                </div>
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          {showAddForm && (
+            <div className="mb-8 bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {editingPackage ? "Edit Package" : "Add New Package"}
+                </h2>
                 <button
-                  onClick={handleSavePackage}
-                  className="flex items-center px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  onClick={handleCancel}
+                  className="text-gray-500 hover:text-gray-700 p-1 rounded-md transition-colors"
                 >
-                  <Save className="w-5 h-5 mr-2" />
-                  Save Package
+                  <X size={20} />
                 </button>
               </div>
-            </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Package Details */}
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
-                      <Package className="w-5 h-5 mr-2" />
-                      Package Details
-                    </h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Package Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={newPackage.name}
-                          onChange={(e) =>
-                            setNewPackage({
-                              ...newPackage,
-                              name: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter package name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Price ($) *
-                        </label>
-                        <input
-                          type="number"
-                          value={newPackage.price}
-                          onChange={(e) =>
-                            setNewPackage({
-                              ...newPackage,
-                              price: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter price"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Direct Bonus (%)
-                        </label>
-                        <input
-                          type="number"
-                          value={newPackage.directBonus}
-                          onChange={(e) =>
-                            setNewPackage({
-                              ...newPackage,
-                              directBonus: parseFloat(e.target.value) || 5,
-                            })
-                          }
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Default: 5%"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Benefits
-                        </label>
-                        {newPackage.benefits.map((benefit, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center space-x-2 mb-2"
-                          >
-                            <input
-                              type="text"
-                              value={benefit}
-                              onChange={(e) =>
-                                handleBenefitChange(index, e.target.value)
-                              }
-                              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Enter benefit"
-                            />
-                            <button
-                              onClick={() => handleRemoveBenefit(index)}
-                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                            >
-                              <X className="w-5 h-5" />
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => handleAddBenefit()}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          + Add Benefit
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Plan Name*
+                  </label>
+                  <input
+                    type="text"
+                    name="plan_name"
+                    value={formData.plan_name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter plan name"
+                  />
                 </div>
 
-                {/* 15-Level Commission Structure */}
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
-                      <TrendingUp className="w-5 h-5 mr-2" />
-                      Team Re-purchase Level Bonus (15 Levels)
-                    </h4>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Package Name*
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter package name"
+                  />
+                </div>
 
-                    {/* Commission Table */}
-                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="bg-green-600 text-white">
-                        <div className="grid grid-cols-3 gap-0">
-                          <div className="px-4 py-3 font-semibold text-center border-r border-green-500">
-                            LEVELS
-                          </div>
-                          <div className="px-4 py-3 font-semibold text-center border-r border-green-500">
-                            BONUS (%)
-                          </div>
-                          <div className="px-4 py-3 font-semibold text-center">
-                            DIRECT MEMBER RE-PURCHASE
-                          </div>
-                        </div>
-                      </div>
-                      <div className="max-h-80 overflow-y-auto">
-                        {levelLabels.map((label, index) => (
-                          <div
-                            key={index}
-                            className={`grid grid-cols-3 gap-0 ${
-                              index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                            }`}
-                          >
-                            <div className="px-4 py-3 text-center border-r border-gray-200 font-medium text-gray-700">
-                              {label}
-                            </div>
-                            <div className="px-4 py-3 text-center border-r border-gray-200">
-                              <input
-                                type="number"
-                                value={newPackage.levelIncome[index]}
-                                onChange={(e) =>
-                                  handleLevelIncomeChange(index, e.target.value)
-                                }
-                                className="w-full px-2 py-1 border border-gray-300 rounded text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="0"
-                              />
-                            </div>
-                            <div className="px-4 py-3 text-center">
-                              <input
-                                type="text"
-                                value={newPackage.repurchaseRequirement[index]}
-                                onChange={(e) =>
-                                  handleRepurchaseChange(index, e.target.value)
-                                }
-                                className="w-full px-2 py-1 border border-gray-300 rounded text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                placeholder={
-                                  index < 5 ? (index + 1).toString() : ""
-                                }
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Package Amount ($)*
+                  </label>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleInputChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter package amount"
+                  />
+                </div>
 
-                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <strong>Note:</strong> Monthly level bonus will get up
-                        to 3 months. Bonus will be calculated upon monthly
-                        loyalty bonus.
-                      </p>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Direct Bonus ($)*
+                  </label>
+                  <input
+                    type="number"
+                    name="directBonus"
+                    value={formData.directBonus}
+                    onChange={handleInputChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter direct bonus"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Matching Value ($)*
+                  </label>
+                  <input
+                    type="number"
+                    name="matchingValue"
+                    value={formData.matchingValue}
+                    onChange={handleInputChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter matching value"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Growth Units*
+                  </label>
+                  <input
+                    type="number"
+                    name="growthUnits"
+                    value={formData.growthUnits}
+                    onChange={handleInputChange}
+                    required
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter growth units"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Level Value ($)*
+                  </label>
+                  <input
+                    type="number"
+                    name="levelValue"
+                    value={formData.levelValue}
+                    onChange={handleInputChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter level value"
+                  />
+                </div>
+
+                <div className="md:col-span-2 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-md transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {editingPackage ? "Update Package" : "Submit"}
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {packages.length > 0 ? (
+            <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-blue-700 text-white">
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Plan Name
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Package Name
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Amount ($)
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Direct Bonus ($)
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Matching Value ($)
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Growth Units
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Level Value ($)
+                    </th>
+                    <th className="px-6 py-4 text-left font-semibold text-sm uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {packages.map((pkg, index) => (
+                    <tr
+                      key={pkg.id}
+                      className={`hover:bg-blue-50 transition-colors duration-150 ${
+                        index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                      }`}
+                    >
+                      <td className="px-6 py-4 font-semibold text-gray-900">
+                        {pkg.plan_name}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-gray-900">
+                        {pkg.name}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">
+                        {pkg.amount.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">
+                        {pkg.direct_bonus.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">
+                        {pkg.matching_value.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">
+                        {pkg.growth_units}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 font-medium">
+                        {pkg.level_value.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 flex gap-2">
+                        <button
+                          onClick={() => handleEdit(pkg)}
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 px-3 py-1 rounded-lg flex items-center gap-1 transition-all duration-200 font-medium"
+                        >
+                          <Edit2 size={16} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(pkg.id)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-1 rounded-lg flex items-center gap-1 transition-all duration-200 font-medium"
+                        >
+                          <X size={16} />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No packages added yet.</p>
+              <p className="text-gray-400 mt-2">
+                Click "Add Package" to get started.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
