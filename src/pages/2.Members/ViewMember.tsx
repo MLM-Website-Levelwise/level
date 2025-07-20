@@ -9,7 +9,9 @@ import {
   Plus,
   Edit,
   Ban,
-  UserCheck,FileSpreadsheet, Printer
+  UserCheck,
+  FileSpreadsheet,
+  Printer,
 } from "lucide-react";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const ViewMember = () => {
@@ -33,39 +35,45 @@ const ViewMember = () => {
   });
 
   // Fetch members from API
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/members`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch members');
+  // Fetch members from API
+  // Update your useEffect hook with the fixed sorting
+// Update your useEffect hook to fetch ALL members
+useEffect(() => {
+  const fetchAllMembers = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch ALL members with special header for PN1001
+      const response = await fetch(`${API_BASE_URL}/all-membersi`, {
+        headers: {
+          'Authorization': 'PN1001' // Special token for public access
         }
-        
-        const data = await response.json();
-        // Sort members by creation date (oldest first) for sequential SL No
-        const sortedMembers = data.members.sort((a, b) => 
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-        setMembers(sortedMembers);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+      });
+      
+      if (!response.ok) throw new Error("Failed to fetch members");
+      const membersData = await response.json();
 
-    fetchMembers();
-  }, [toast]);
+      // Sort by joining date
+      const sortedMembers = membersData.sort((a, b) => {
+        const dateA = new Date(a.date_of_joining).getTime();
+        const dateB = new Date(b.date_of_joining).getTime();
+        return dateA - dateB;
+      });
+
+      setMembers(sortedMembers);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAllMembers();
+}, [toast]);
 
   // Filter and search logic
   const filteredMembers = members.filter((member) => {
@@ -77,7 +85,8 @@ const ViewMember = () => {
 
     const matchesDateFrom =
       !filters.dateFrom || member.date_of_joining >= filters.dateFrom;
-    const matchesDateTo = !filters.dateTo || member.date_of_joining <= filters.dateTo;
+    const matchesDateTo =
+      !filters.dateTo || member.date_of_joining <= filters.dateTo;
     const matchesPackage =
       !filters.package || member.package === filters.package;
     const matchesMemberCode =
@@ -86,7 +95,7 @@ const ViewMember = () => {
       !filters.memberName ||
       member.name.toLowerCase().includes(filters.memberName.toLowerCase());
     const matchesActiveStatus =
-      !filters.activeStatus || 
+      !filters.activeStatus ||
       (member.active_status ? "Active" : "Inactive") === filters.activeStatus;
 
     return (
@@ -99,7 +108,6 @@ const ViewMember = () => {
       matchesActiveStatus
     );
   });
-
   // Pagination logic
   const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -109,7 +117,7 @@ const ViewMember = () => {
   );
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
 
@@ -130,47 +138,60 @@ const ViewMember = () => {
   };
 
   const handleAddMember = () => {
-    navigate('/members/add-member');
+    navigate("/members/add-member");
   };
 
   const handleUpdateStatus = async (memberId, currentStatus) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/members/${memberId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          active_status: !currentStatus
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update status');
-      }
-
-      const data = await response.json();
-      
-      // Update local state
-      setMembers(prev => prev.map(member => 
-        member.id === memberId ? { ...member, active_status: !currentStatus } : member
-      ));
-
-      toast({
-        title: "Success",
-        description: `Member status updated to ${!currentStatus ? 'Active' : 'Inactive'}`,
-      });
-    } catch (error) {
+  try {
+    // Prevent reactivation if member is already deactivated
+    if (currentStatus === false) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Deactivated members cannot be reactivated",
         variant: "destructive",
       });
+      return;
     }
-  };
 
+    const response = await fetch(
+      `${API_BASE_URL}/members/${memberId}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          active_status: false, // Only allow setting to false
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to update status");
+    }
+
+    // Update local state
+    setMembers((prev) =>
+      prev.map((member) =>
+        member.id === memberId
+          ? { ...member, active_status: false } // Only set to false
+          : member
+      )
+    );
+
+    toast({
+      title: "Success",
+      description: "Member has been deactivated",
+    });
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
+  }
+};
   if (loading) {
     return (
       <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
@@ -410,36 +431,43 @@ const ViewMember = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-600 text-white">
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Sl No.
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">DOJ</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
+                  DOJ
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Member Id
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  Name
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap min-w-[120px]">
+                  Member Name
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  Sponsor Code
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
+                  Sponsor Id
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap min-w-[120px]">
                   Sponsor Name
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
+                  Position
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
+                  Top-up Date
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Package
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Phone Number
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Password
                 </th>
-                
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Active Status
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
+                <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                   Actions
                 </th>
               </tr>
@@ -470,6 +498,12 @@ const ViewMember = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {member.sponsor_name}
                   </td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+          {member.position || '-'}
+        </td>
+        <td className="px-4 py-3 text-sm text-gray-900">
+          {member.topup_date ? new Date(member.topup_date).toLocaleDateString("en-GB") : '-'}
+        </td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -487,7 +521,6 @@ const ViewMember = () => {
                   <td className="px-4 py-3 text-sm text-gray-900">
                     {member.password}
                   </td>
-                  
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -510,23 +543,22 @@ const ViewMember = () => {
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() =>
-                          handleUpdateStatus(member.id, member.active_status)
-                        }
-                        className={`p-1 rounded ${
-                          member.active_status
-                            ? "text-red-600 hover:text-red-800"
-                            : "text-green-600 hover:text-green-800"
-                        }`}
-                        title={member.active_status ? "Deactivate" : "Activate"}
-                      >
-                        {member.active_status ? (
-                          <Ban className="w-4 h-4" />
-                        ) : (
-                          <UserCheck className="w-4 h-4" />
-                        )}
-                      </button>
+                     <button
+  onClick={() => handleUpdateStatus(member.id, member.active_status)}
+  disabled={!member.active_status}
+  className={`p-1 rounded ${
+    member.active_status
+      ? "text-red-600 hover:text-red-800"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+  title={member.active_status ? "Deactivate" : "Cannot reactivate"}
+>
+  {member.active_status ? (
+    <Ban className="w-4 h-4" />
+  ) : (
+    <UserCheck className="w-4 h-4" />
+  )}
+</button>
                     </div>
                   </td>
                 </tr>

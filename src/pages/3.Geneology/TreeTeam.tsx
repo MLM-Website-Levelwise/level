@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { User } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface TeamMember {
   id: number;
@@ -17,8 +17,7 @@ interface TeamMember {
   position: "Left" | "Right" | "Center";
   date_of_joining: string;
   active_status: boolean;
-  left?: TeamMember | null;
-  right?: TeamMember | null;
+  children?: TeamMember[];
   level?: number;
 }
 
@@ -27,107 +26,42 @@ const MLMBinaryTree = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchId, setSearchId] = useState("");
-  const [treeDepth, setTreeDepth] = useState(4);
+  const [treeDepth, setTreeDepth] = useState(3);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  // Build MLM tree from sponsor relationships
-  const buildMLMTree = (members: TeamMember[], rootId: string): TeamMember | null => {
-    const memberMap = new Map<string, TeamMember>();
-    
-    // Create virtual admin node if needed
-    if (rootId === '100001' && !members.some(m => m.member_id === '100001')) {
-      memberMap.set('100001', {
-        id: 0,
-        member_id: '100001',
-        name: 'Admin',
-        sponsor_code: '',
-        sponsor_name: 'System',
-        position: 'Center',
-        date_of_joining: new Date().toISOString(),
-        active_status: true,
-        left: null,
-        right: null,
-        level: 1
-      });
-    }
-
-    // Create all nodes from API data
-    members.forEach(member => {
-      memberMap.set(member.member_id, { 
-        ...member, 
-        left: null, 
-        right: null,
-        level: 0
-      });
-    });
-
-    // Build tree relationships
-    members.forEach(member => {
-      const parent = memberMap.get(member.sponsor_code);
-      if (parent) {
-        if (member.position === "Left") {
-          parent.left = memberMap.get(member.member_id) || null;
-        } else {
-          parent.right = memberMap.get(member.member_id) || null;
-        }
-      }
-    });
-
-    // Calculate levels starting from root
-    const calculateLevels = (node: TeamMember | null, level: number) => {
-      if (!node) return;
-      node.level = level;
-      calculateLevels(node.left, level + 1);
-      calculateLevels(node.right, level + 1);
-    };
-
-    const root = memberMap.get(rootId);
-    if (root) {
-      calculateLevels(root, 1);
-      return root;
-    }
-    return null;
-  };
-
-  const fetchTeamData = async (memberId?: string) => {
+  const fetchTeamData = async (memberId: string) => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Authentication required");
-
-      // Get all members
-      const response = await axios.get(`${API_BASE_URL}/members`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { limit: 1000 }
+      const response = await axios.get(`${API_BASE_URL}/binary-team-by-member/${memberId}`, {
+        params: { levels: treeDepth }
       });
 
-      const allMembers = response.data.members;
-      const rootId = memberId || '100001'; // Default to admin
+      const teamData = response.data;
+      if (!teamData) throw new Error("No team data received");
 
-      // Check if searched member exists (except for admin)
-      if (rootId !== '100001' && !allMembers.some(m => m.member_id === rootId)) {
-        throw new Error(`Member ${rootId} not found in database`);
-      }
-
-      // Build the tree structure
-      const tree = buildMLMTree(allMembers, rootId);
-      if (!tree) throw new Error("Failed to build team structure");
-      
-      setRootMember(tree);
+      setRootMember(teamData);
+      setHasSearched(true);
     } catch (err: any) {
       setError(err.response?.data?.error || err.message);
+      setHasSearched(true);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchTeamData();
-  }, []);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchId.trim()) fetchTeamData(searchId);
+    if (searchId.trim()) {
+      fetchTeamData(searchId);
+    }
+  };
+
+  const handleReset = () => {
+    setSearchId("");
+    setRootMember(null);
+    setHasSearched(false);
+    setError(null);
   };
 
   const MemberNode = ({ member, isRoot = false }: { member: TeamMember; isRoot?: boolean }) => {
@@ -169,21 +103,24 @@ const MLMBinaryTree = () => {
     );
   };
 
-  const renderTree = (node: TeamMember | null, currentDepth: number): JSX.Element => {
+  const renderTree = (node: TeamMember | null, currentDepth = 1): JSX.Element => {
     if (!node || currentDepth > treeDepth) return <></>;
+
+    const leftChild = node.children?.find(c => c.position === "Left");
+    const rightChild = node.children?.find(c => c.position === "Right");
 
     return (
       <div className="flex flex-col items-center space-y-4">
         <MemberNode member={node} isRoot={currentDepth === 1} />
         
-        {(node.left || node.right) && (
+        {(leftChild || rightChild) && (
           <div className="flex justify-center space-x-8 mt-2">
             {/* Left branch */}
             <div className="flex flex-col items-center">
-              {node.left ? (
+              {leftChild ? (
                 <>
                   <div className="h-6 w-px bg-gray-300"></div>
-                  {renderTree(node.left, currentDepth + 1)}
+                  {renderTree(leftChild, currentDepth + 1)}
                 </>
               ) : currentDepth < treeDepth && (
                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
@@ -194,10 +131,10 @@ const MLMBinaryTree = () => {
             
             {/* Right branch */}
             <div className="flex flex-col items-center">
-              {node.right ? (
+              {rightChild ? (
                 <>
                   <div className="h-6 w-px bg-gray-300"></div>
-                  {renderTree(node.right, currentDepth + 1)}
+                  {renderTree(rightChild, currentDepth + 1)}
                 </>
               ) : currentDepth < treeDepth && (
                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
@@ -219,30 +156,41 @@ const MLMBinaryTree = () => {
       
       <div className="p-6">
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-          <form onSubmit={handleSearch} className="flex items-center border rounded-md overflow-hidden">
+          <form onSubmit={handleSearch} className="flex items-center gap-2">
             <Input
               placeholder="Enter member ID"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              className="w-48 border-none focus:ring-0"
+              className="w-48"
             />
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 rounded-none">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
               Search
             </Button>
+            {hasSearched && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleReset}
+              >
+                Reset
+              </Button>
+            )}
           </form>
           
-          <div className="flex items-center gap-2">
-            <span className="text-sm">Tree Depth:</span>
-            <select 
-              value={treeDepth}
-              onChange={(e) => setTreeDepth(Number(e.target.value))}
-              className="border rounded px-2 py-1 text-sm"
-            >
-              {[2, 3, 4, 5, 6].map(depth => (
-                <option key={depth} value={depth}>{depth}</option>
-              ))}
-            </select>
-          </div>
+          {hasSearched && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Tree Depth:</span>
+              <select 
+                value={treeDepth}
+                onChange={(e) => setTreeDepth(Number(e.target.value))}
+                className="border rounded px-2 py-1 text-sm"
+              >
+                {[2, 3, 4, 5, 6].map(depth => (
+                  <option key={depth} value={depth}>{depth}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -251,15 +199,21 @@ const MLMBinaryTree = () => {
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-800"></div>
           </div>
-        ) : rootMember ? (
-          <div className="overflow-auto p-4 bg-white rounded-lg border">
-            <div className="min-w-max mx-auto">
-              {renderTree(rootMember, 1)}
+        ) : hasSearched ? (
+          rootMember ? (
+            <div className="overflow-auto p-4 bg-white rounded-lg border">
+              <div className="min-w-max mx-auto">
+                {renderTree(rootMember)}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              No team data available for this member
+            </div>
+          )
         ) : (
           <div className="text-center py-12 text-gray-500">
-            No team data available
+            Enter a member ID to view their team structure
           </div>
         )}
       </div>
