@@ -11,6 +11,10 @@ interface Member {
   date_of_joining: string;
   active_status: boolean;
   level?: number;
+  profit_sharing?: number;
+  bonus?: number;
+  topup_amount?: number;
+  total_business?: number;
 }
 
 const LevelTeam = () => {
@@ -31,40 +35,46 @@ const LevelTeam = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchTeamByMember = async (memberId: string) => {
-  try {
-    setLoading(true);
-    const response = await fetch(
-      `${API_BASE_URL}/level-team-by-member/${memberId}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Member ${memberId} not found or server error`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.teamMembers || data.teamMembers.length === 0) {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_BASE_URL}/level-team-by-member/${memberId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Member ${memberId} not found or server error`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.teamMembers || data.teamMembers.length === 0) {
+        toast({
+          title: "Info",
+          description: `No team members found for ${memberId}`,
+        });
+      }
+      
+      setTeamData(data);
+    } catch (error) {
       toast({
-        title: "Info",
-        description: `No team members found for ${memberId}`,
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
+      setTeamData({
+        currentMember: null,
+        teamMembers: [],
+      });
+    } finally {
+      setLoading(false);
     }
-    
-    setTeamData(data);
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: error.message,
-      variant: "destructive",
-    });
-    setTeamData({
-      currentMember: null,
-      teamMembers: [],
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
@@ -139,6 +149,12 @@ const LevelTeam = () => {
     );
   }
 
+  // Calculate totals
+  const totalProfitSharing = filteredData.reduce((sum, member) => sum + (member.profit_sharing || 0), 0);
+  const totalBonus = filteredData.reduce((sum, member) => sum + (member.bonus || 0), 0);
+  const totalTopup = filteredData.reduce((sum, member) => sum + (member.topup_amount || 0), 0);
+  const totalBusiness = filteredData.reduce((sum, member) => sum + (member.total_business || 0), 0);
+
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -151,40 +167,56 @@ const LevelTeam = () => {
 
         {/* Search Section */}
         <div className="bg-white p-6 border-l border-r border-gray-200">
-  <div className="flex flex-col md:flex-row gap-4 items-end">
-    <div className="flex-1">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        Search by Member ID
-      </label>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
+          <div className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search by Member ID
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Enter member ID (e.g. PW001)"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleSearch}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+              disabled={loading}
+            >
+              {loading ? "Searching..." : "Search"}
+            </button>
+          </div>
         </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          placeholder="Enter member ID (e.g. PW001)"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-        />
-      </div>
-      {/* Add this debug info */}
-      {process.env.NODE_ENV === 'development' && (
-        <p className="text-xs text-gray-500 mt-1">
-          API: {API_BASE_URL}/level-team-by-member/{searchTerm}
-        </p>
-      )}
-    </div>
-    <button
-      onClick={handleSearch}
-      className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-      disabled={loading}
-    >
-      {loading ? "Searching..." : "Search"}
-    </button>
-  </div>
-</div>
+
+        {/* Summary Cards */}
+        {teamData.currentMember && (
+          <div className="bg-white p-4 border-l border-r border-gray-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+              <h3 className="text-sm font-medium text-green-800">Profit Sharing</h3>
+              <p className="text-2xl font-bold text-green-600">₹{totalProfitSharing.toFixed(2)}</p>
+            </div>
+            {/* <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <h3 className="text-sm font-medium text-blue-800">Bonus</h3>
+              <p className="text-2xl font-bold text-blue-600">₹{totalBonus.toFixed(2)}</p>
+            </div> */}
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
+              <h3 className="text-sm font-medium text-purple-800">Topup Amount</h3>
+              <p className="text-2xl font-bold text-purple-600">₹{totalTopup.toFixed(2)}</p>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
+              <h3 className="text-sm font-medium text-orange-800">Total Business</h3>
+              <p className="text-2xl font-bold text-orange-600">₹{totalBusiness.toFixed(2)}</p>
+            </div>
+          </div>
+        )}
 
         {/* Filter Section - Only shown after search */}
         {teamData.currentMember && (
@@ -325,6 +357,10 @@ const LevelTeam = () => {
                       <th className="px-4 py-3 text-left text-sm font-medium">Sponsor Name</th>
                       <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                       <th className="px-4 py-3 text-left text-sm font-medium">Level</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium">Profit Sharing</th>
+                      {/* <th className="px-4 py-3 text-left text-sm font-medium">Bonus</th> */}
+                      <th className="px-4 py-3 text-left text-sm font-medium">Topup</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium">Total Business</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -350,8 +386,20 @@ const LevelTeam = () => {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900">{member.level}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">₹{member.profit_sharing?.toFixed(2) || '0.00'}</td>
+                        {/* <td className="px-4 py-3 text-sm text-gray-900">₹{member.bonus?.toFixed(2) || '0.00'}</td> */}
+                        <td className="px-4 py-3 text-sm text-gray-900">₹{member.topup_amount?.toFixed(2) || '0.00'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">₹{member.total_business?.toFixed(2) || '0.00'}</td>
                       </tr>
                     ))}
+                    {/* Totals Row */}
+                    <tr className="bg-gray-50 font-medium">
+                      <td colSpan={8} className="px-4 py-3 text-sm text-gray-900 text-right">Totals:</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">₹{totalProfitSharing.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">₹{totalBonus.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">₹{totalTopup.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">₹{totalBusiness.toFixed(2)}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>

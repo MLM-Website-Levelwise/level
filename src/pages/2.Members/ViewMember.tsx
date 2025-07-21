@@ -141,17 +141,9 @@ useEffect(() => {
     navigate("/members/add-member");
   };
 
-  const handleUpdateStatus = async (memberId, currentStatus) => {
+ const handleUpdateStatus = async (memberId, currentStatus) => {
   try {
-    // Prevent reactivation if member is already deactivated
-    if (currentStatus === false) {
-      toast({
-        title: "Error",
-        description: "Deactivated members cannot be reactivated",
-        variant: "destructive",
-      });
-      return;
-    }
+    const newStatus = !currentStatus; // Toggle the status
 
     const response = await fetch(
       `${API_BASE_URL}/members/${memberId}/status`,
@@ -161,7 +153,7 @@ useEffect(() => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          active_status: false, // Only allow setting to false
+          active_status: newStatus,
         }),
       }
     );
@@ -175,14 +167,14 @@ useEffect(() => {
     setMembers((prev) =>
       prev.map((member) =>
         member.id === memberId
-          ? { ...member, active_status: false } // Only set to false
+          ? { ...member, active_status: newStatus }
           : member
       )
     );
 
     toast({
       title: "Success",
-      description: "Member has been deactivated",
+      description: `Member has been ${newStatus ? "activated" : "deactivated"}`,
     });
   } catch (error) {
     toast({
@@ -482,10 +474,16 @@ useEffect(() => {
                     {members.findIndex((m) => m.id === member.id) + 1}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
-                    {new Date(member.date_of_joining).toLocaleDateString(
-                      "en-GB"
-                    )}
-                  </td>
+  {new Date(member.date_of_joining).toLocaleDateString("en-GB")}
+  <br />
+  <span className="text-xs text-gray-500">
+    {member.created_at && new Date(member.created_at).toLocaleTimeString("en-GB", {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })}
+  </span>
+</td>
                   <td className="px-4 py-3 text-sm text-blue-600 font-medium">
                     {member.member_id}
                   </td>
@@ -543,15 +541,14 @@ useEffect(() => {
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                     <button
+                    <button
   onClick={() => handleUpdateStatus(member.id, member.active_status)}
-  disabled={!member.active_status}
   className={`p-1 rounded ${
     member.active_status
       ? "text-red-600 hover:text-red-800"
-      : "text-gray-400 cursor-not-allowed"
+      : "text-green-600 hover:text-green-800"
   }`}
-  title={member.active_status ? "Deactivate" : "Cannot reactivate"}
+  title={member.active_status ? "Deactivate" : "Activate"}
 >
   {member.active_status ? (
     <Ban className="w-4 h-4" />

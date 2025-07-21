@@ -17,7 +17,8 @@ const EditMember = () => {
     sponsorCode: '',
     sponsorName: '',
     package: 'Elite',
-    password: ''
+    password: '',
+    position: 'Left' // Default value
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,8 @@ const EditMember = () => {
           sponsorCode: data.sponsor_code,
           sponsorName: data.sponsor_name,
           package: data.package,
-          password: data.password
+          password: data.password,
+          position: data.position || 'Left' // Fallback to 'Left' if not provided
         });
       } catch (error) {
         toast({
@@ -75,6 +77,18 @@ const EditMember = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const requestBody = {
+      name: formData.name,
+      phone_number: formData.mobileNo,
+      email: formData.emailId || null,
+      sponsor_code: formData.sponsorCode,
+      sponsor_name: formData.sponsorName,
+      package: formData.package,
+      password: formData.password,
+      date_of_joining: formData.dateOfJoining,
+      position: formData.position
+    };
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/members/${id}`, {
@@ -83,22 +97,12 @@ const EditMember = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          name: formData.name,
-          phone_number: formData.mobileNo,
-          email: formData.emailId || null,
-          sponsor_code: formData.sponsorCode,
-          sponsor_name: formData.sponsorName,
-          package: formData.package,
-          password: formData.password,
-          date_of_joining: formData.dateOfJoining
-        })
+        body: JSON.stringify(requestBody)
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update member');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update member');
       }
 
       toast({
@@ -269,6 +273,23 @@ const EditMember = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   />
+                </div>
+
+                {/* Position */}
+                <div>
+                  <label className="block text-gray-700 text-sm mb-2">
+                    Position <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="position"
+                    value={formData.position}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="Left">Left</option>
+                    <option value="Right">Right</option>
+                  </select>
                 </div>
               </div>
             </div>

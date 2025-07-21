@@ -20,7 +20,8 @@ interface Member {
   name: string;
   position: "Left" | "Right";
   date_of_joining: string;
-  status: boolean;
+  created_at: string; // Add this
+  status: boolean; // Should be boolean to match active_status
   package: string;
 }
 
@@ -372,10 +373,16 @@ const DirectMember: React.FC = () => {
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
-                      {new Date(member.date_of_joining).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </td>
+  {new Date(member.date_of_joining).toLocaleDateString("en-GB")}
+  <br />
+  <span className="text-xs text-gray-500">
+    {member.created_at && new Date(member.created_at).toLocaleTimeString("en-GB", {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })}
+  </span>
+</td>
                     <td className="px-4 py-3 text-sm text-blue-600 font-medium">
                       {member.member_id}
                     </td>
