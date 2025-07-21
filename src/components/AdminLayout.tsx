@@ -101,6 +101,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         { title: "Add Member", path: "/members/add-member" },
         { title: "View Members", path: "/members/view-members" },
         { title: "Direct Members", path: "/members/direct-members" },
+        { title: "Bank Details", path: "/members/members-bankdetails" },
       ],
     },
     {

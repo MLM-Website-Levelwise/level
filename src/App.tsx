@@ -12,6 +12,7 @@ import AddMember from "./pages/2.Members/AddMember";
 import ViewMember from "./pages/2.Members/ViewMember";
 import DirectMember from "./pages/2.Members/DirectMember";
 import AllDirectMem from "./pages/2.Members/AllDirectMem";
+import BankDetails from "./pages/2.Members/BankDetails";
 
 import LevelTeam from "./pages/3.Geneology/LevelTeam";
 import TreeTeam from "./pages/3.Geneology/TreeTeam";
@@ -20,7 +21,7 @@ import FundGenerate from "./pages/4.Fund/FundGenerate";
 import FundHistory from "./pages/4.Fund/FundHistory";
 
 import AddPackage from "./pages/5.Package/PackageManager";
-import {ProtectedRoute} from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 import EditMember from "./components/EditMember";
 
@@ -44,89 +45,98 @@ const App = () => (
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>
-          <Route
-            path="/dashboard"
-            element={
-              <AdminLayout>
-                <Dashboard />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/members/add-member"
-            element={
-              <AdminLayout>
-                <AddMember />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/members/view-members"
-            element={
-              <AdminLayout>
-                <ViewMember />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/members/direct-members"
-            element={
-              <AdminLayout>
-                <DirectMember />
-              </AdminLayout>
-            }
-          />
+            <Route
+              path="/dashboard"
+              element={
+                <AdminLayout>
+                  <Dashboard />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/members/add-member"
+              element={
+                <AdminLayout>
+                  <AddMember />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/members/view-members"
+              element={
+                <AdminLayout>
+                  <ViewMember />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/members/direct-members"
+              element={
+                <AdminLayout>
+                  <DirectMember />
+                </AdminLayout>
+              }
+            />
 
-          <Route
-            path="/members/allDir"
-            element={
-              <AdminLayout>
-                <AllDirectMem />
-              </AdminLayout>
-            }
-          />
+            <Route
+              path="/members/allDir"
+              element={
+                <AdminLayout>
+                  <AllDirectMem />
+                </AdminLayout>
+              }
+            />
 
-           <Route
-            path="/geneology/level-wise-team"
-            element={
-              <AdminLayout>
-                <LevelTeam />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/geneology/binary-team"
-            element={
-              <AdminLayout>
-                <TreeTeam />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/master/fund-generate"
-            element={
-              <AdminLayout>
-                <FundGenerate />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/master/fund-history"
-            element={
-              <AdminLayout>
-                <FundHistory />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/package/add-package"
-            element={
-              <AdminLayout>
-                <AddPackage />
-              </AdminLayout>
-            }
-          />
-          {/* <Route
+            <Route
+              path="members/members-bankdetails"
+              element={
+                <AdminLayout>
+                  <BankDetails />
+                </AdminLayout>
+              }
+            />
+
+            <Route
+              path="/geneology/level-wise-team"
+              element={
+                <AdminLayout>
+                  <LevelTeam />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/geneology/binary-team"
+              element={
+                <AdminLayout>
+                  <TreeTeam />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/master/fund-generate"
+              element={
+                <AdminLayout>
+                  <FundGenerate />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/master/fund-history"
+              element={
+                <AdminLayout>
+                  <FundHistory />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/package/add-package"
+              element={
+                <AdminLayout>
+                  <AddPackage />
+                </AdminLayout>
+              }
+            />
+            {/* <Route
             path="/members-kyc"
             element={
               <AdminLayout>
@@ -134,38 +144,38 @@ const App = () => (
               </AdminLayout>
             }
           /> */}
-          {/* 
+            {/* 
           <Route path="/active-autopool" element={
             <AdminLayout>
               <ActiveAutopool />
             </AdminLayout>
           } /> */}
-          {/* User Icons */}
+            {/* User Icons */}
 
-          <Route
-  path="/members/edit-member/:id"
-  element={
-    <AdminLayout>
-      <EditMember />
-    </AdminLayout>
-  }
-/>
-          <Route
-            path="/profile"
-            element={
-              <AdminLayout>
-                <Profile />
-              </AdminLayout>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <AdminLayout>
-                <Settings />
-              </AdminLayout>
-            }
-          />
+            <Route
+              path="/members/edit-member/:id"
+              element={
+                <AdminLayout>
+                  <EditMember />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <AdminLayout>
+                  <Profile />
+                </AdminLayout>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <AdminLayout>
+                  <Settings />
+                </AdminLayout>
+              }
+            />
           </Route>
           {/* <Route path="/index" element={<Index />} />
           ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
