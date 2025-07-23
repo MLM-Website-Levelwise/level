@@ -1,22 +1,28 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react"; // Import check icon
 
 const BankDetails = () => {
   const [bankData, setBankData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    holderName: "",
-    bankName: "",
-    branch: "",
-    ifsc: "",
-    accountNumber: "",
-    accountType: "",
-    panNumber: ""
-  });
+  const navigate = useNavigate();
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // Load approved statuses from localStorage
+  const getApprovedStatuses = () => {
+    const approved = localStorage.getItem('approvedBankDetails');
+    return approved ? JSON.parse(approved) : {};
+  };
+
+  // Save approved status to localStorage
+  const saveApprovedStatus = (id) => {
+    const approved = getApprovedStatuses();
+    approved[id] = true;
+    localStorage.setItem('approvedBankDetails', JSON.stringify(approved));
+  };
 
   useEffect(() => {
     const fetchBankDetails = async () => {
@@ -28,9 +34,10 @@ const BankDetails = () => {
         });
         
         if (response.data && response.data.length > 0) {
+          const approvedStatuses = getApprovedStatuses();
           const formattedData = response.data.map((item, index) => ({
-            id: item.id, // Use the actual database ID now
-            tableId: index + 1, // For display only
+            id: item.id,
+            tableId: index + 1,
             doj: new Date(item.created_at).toISOString().split('T')[0],
             memberId: item.member_id,
             holderName: item.member_name || item.account_holder_name,
@@ -39,7 +46,8 @@ const BankDetails = () => {
             ifsc: item.ifsc_code,
             accountNumber: item.account_number,
             accountType: item.account_type,
-            panNumber: item.pan_number
+            panNumber: item.pan_number,
+            status: approvedStatuses[item.id] ? 'Approved' : 'Pending'
           }));
           setBankData(formattedData);
         } else {
@@ -56,72 +64,20 @@ const BankDetails = () => {
     fetchBankDetails();
   }, []);
 
-  const handleEditClick = (item) => {
-    setEditingId(item.id);
-    setEditFormData({
-      holderName: item.holderName,
-      bankName: item.bankName,
-      branch: item.branch,
-      ifsc: item.ifsc,
-      accountNumber: item.accountNumber,
-      accountType: item.accountType,
-      panNumber: item.panNumber
-    });
+  const handleEditClick = (id) => {
+    navigate(`/bank-details/edit/${id}`);
   };
 
-  const handleCancelClick = () => {
-    setEditingId(null);
-  };
-
-  const handleEditFormChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData({
-      ...editFormData,
-      [name]: value
-    });
-  };
-
-  const handleSaveClick = async (id) => {
-    try {
-      const response = await axios.put(
-        `${API_BASE_URL}/api/update-bank-details/${id}`,
-        {
-          account_holder_name: editFormData.holderName,
-          bank_name: editFormData.bankName,
-          branch_name: editFormData.branch,
-          ifsc_code: editFormData.ifsc,
-          account_number: editFormData.accountNumber,
-          account_type: editFormData.accountType,
-          pan_number: editFormData.panNumber
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-
-      setBankData(bankData.map(item => {
-        if (item.id === id) {
-          return {
-            ...item,
-            holderName: response.data.account_holder_name,
-            bankName: response.data.bank_name,
-            branch: response.data.branch_name,
-            ifsc: response.data.ifsc_code,
-            accountNumber: response.data.account_number,
-            accountType: response.data.account_type,
-            panNumber: response.data.pan_number
-          };
-        }
-        return item;
-      }));
-
-      setEditingId(null);
-    } catch (err) {
-      console.error('Error updating bank details:', err);
-      setError(err.response?.data?.error || 'Failed to update bank details');
-    }
+  const handleApproveClick = (id) => {
+    // Update the status in state
+    setBankData(prevData => 
+      prevData.map(item => 
+        item.id === id ? { ...item, status: 'Approved' } : item
+      )
+    );
+    
+    // Save to localStorage
+    saveApprovedStatus(id);
   };
 
   if (loading) {
@@ -156,6 +112,7 @@ const BankDetails = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Account Number</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Account Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">PAN Number</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -165,110 +122,41 @@ const BankDetails = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.tableId}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.doj}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.memberId}</td>
-                
-                {editingId === item.id ? (
-                  <>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="text"
-                        name="holderName"
-                        value={editFormData.holderName}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="text"
-                        name="bankName"
-                        value={editFormData.bankName}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="text"
-                        name="branch"
-                        value={editFormData.branch}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="text"
-                        name="ifsc"
-                        value={editFormData.ifsc}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="text"
-                        name="accountNumber"
-                        value={editFormData.accountNumber}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        name="accountType"
-                        value={editFormData.accountType}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.holderName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.bankName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.branch}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.ifsc}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.accountNumber}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.accountType}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.panNumber}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      item.status === 'Approved' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {item.status}
+                    </span>
+                    {item.status === 'Pending' && (
+                      <button 
+                        onClick={() => handleApproveClick(item.id)}
+                        className="text-green-600 hover:text-green-800"
+                        title="Approve"
                       >
-                        <option value="Savings">Savings</option>
-                        <option value="Current">Current</option>
-                        <option value="Salary">Salary</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="text"
-                        name="panNumber"
-                        value={editFormData.panNumber}
-                        onChange={handleEditFormChange}
-                        className="text-sm border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => handleSaveClick(item.id)}
-                        className="text-green-600 hover:text-green-900 mr-2"
-                      >
-                        Save
+                        <Check className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={handleCancelClick}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Cancel
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.holderName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.bankName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.branch}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.ifsc}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.accountNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.accountType}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.panNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => handleEditClick(item)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </>
-                )}
+                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button
+                    onClick={() => handleEditClick(item.id)}
+                    className="text-blue-600 hover:text-blue-900"
+                  >
+                    Edit
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -13,6 +13,7 @@ import ViewMember from "./pages/2.Members/ViewMember";
 import DirectMember from "./pages/2.Members/DirectMember";
 import AllDirectMem from "./pages/2.Members/AllDirectMem";
 import BankDetails from "./pages/2.Members/BankDetails";
+import EditBankDetails from './pages/2.Members/EditBankDetails';
 
 import LevelTeam from "./pages/3.Geneology/LevelTeam";
 import TreeTeam from "./pages/3.Geneology/TreeTeam";
@@ -95,6 +96,7 @@ const App = () => (
                 </AdminLayout>
               }
             />
+            <Route path="/bank-details/edit/:id" element={<AdminLayout><EditBankDetails /></AdminLayout>} />
 
             <Route
               path="/geneology/level-wise-team"

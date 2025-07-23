@@ -154,6 +154,7 @@ useEffect(() => {
         },
         body: JSON.stringify({
           active_status: newStatus,
+          was_active: currentStatus // Track if member was previously active
         }),
       }
     );
@@ -167,14 +168,18 @@ useEffect(() => {
     setMembers((prev) =>
       prev.map((member) =>
         member.id === memberId
-          ? { ...member, active_status: newStatus }
+          ? { 
+              ...member, 
+              active_status: newStatus,
+              was_active: currentStatus // Store the previous active state
+            }
           : member
       )
     );
 
     toast({
       title: "Success",
-      description: `Member has been ${newStatus ? "activated" : "deactivated"}`,
+      description: `Member has been ${newStatus ? "activated" : "blocked"}`,
     });
   } catch (error) {
     toast({
@@ -394,16 +399,17 @@ useEffect(() => {
                     Status
                   </label>
                   <select
-                    value={filters.activeStatus}
-                    onChange={(e) =>
-                      handleFilterChange("activeStatus", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">All Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+  value={filters.activeStatus}
+  onChange={(e) =>
+    handleFilterChange("activeStatus", e.target.value)
+  }
+  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+>
+  <option value="">All Status</option>
+  <option value="Active">Active</option>
+  <option value="Inactive">Inactive</option>
+  <option value="Blocked">Blocked</option>
+</select>
                 </div>
               </div>
               <div className="mt-4">
@@ -520,16 +526,16 @@ useEffect(() => {
                     {member.password}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        member.active_status
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {member.active_status ? "Active" : "Inactive"}
-                    </span>
-                  </td>
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-medium ${
+      member.active_status
+        ? "bg-green-100 text-green-800"
+        : "bg-red-100 text-red-800"
+    }`}
+  >
+    {member.active_status ? "Active" : member.was_active ? "Blocked" : "Inactive"}
+  </span>
+</td>
                   <td className="px-4 py-3 text-sm">
                     <div className="flex gap-2">
                       <button
