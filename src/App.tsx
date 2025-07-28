@@ -13,7 +13,7 @@ import ViewMember from "./pages/2.Members/ViewMember";
 import DirectMember from "./pages/2.Members/DirectMember";
 import AllDirectMem from "./pages/2.Members/AllDirectMem";
 import BankDetails from "./pages/2.Members/BankDetails";
-import EditBankDetails from './pages/2.Members/EditBankDetails';
+import EditBankDetails from "./pages/2.Members/EditBankDetails";
 
 import LevelTeam from "./pages/3.Geneology/LevelTeam";
 import TreeTeam from "./pages/3.Geneology/TreeTeam";
@@ -23,6 +23,10 @@ import FundHistory from "./pages/4.Fund/FundHistory";
 
 import AddPackage from "./pages/5.Package/PackageManager";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+
+import TodaysRequest from "./pages/6. Withdrawal/TodaysRequest";
+import PendingRequest from "./pages/6. Withdrawal/PendingRequest";
+import WithdrwalHistory from "./pages/6. Withdrawal/WithdrwalHistory";
 
 import EditMember from "./components/EditMember";
 
@@ -96,7 +100,14 @@ const App = () => (
                 </AdminLayout>
               }
             />
-            <Route path="/bank-details/edit/:id" element={<AdminLayout><EditBankDetails /></AdminLayout>} />
+            <Route
+              path="/bank-details/edit/:id"
+              element={
+                <AdminLayout>
+                  <EditBankDetails />
+                </AdminLayout>
+              }
+            />
 
             <Route
               path="/geneology/level-wise-team"
@@ -162,6 +173,25 @@ const App = () => (
                 </AdminLayout>
               }
             />
+
+            <Route
+              path="/withdrawal/todays-request"
+              element={
+                <AdminLayout>
+                  <TodaysRequest />
+                </AdminLayout>
+              }
+            />
+
+            <Route
+              path="/withdrawal/history"
+              element={
+                <AdminLayout>
+                  <WithdrwalHistory />
+                </AdminLayout>
+              }
+            />
+
             <Route
               path="/profile"
               element={

@@ -141,6 +141,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       ],
     },
     {
+      id: "withdrawal",
+      title: "Withdrawal",
+      icon: CreditCard,
+      children: [
+        { title: "Withdraw Requests", path: "/withdrawal/todays-request" },
+        // { title: "Pending's Request", path: "/withdrawal/pending-request" },
+        { title: "History", path: "/withdrawal/history" },
+      ],
+    },
+    {
       id: "setting",
       title: "Setting",
       icon: UserCog,
